@@ -10,6 +10,7 @@ from components.Segment import Segment
 from components.Truck import Truck
 from components.Worker import Worker
 from engine.RenderCore import RenderCore
+from engine.utils.Dijkstras import Dijkstras
 
 
 def make_nodes():
@@ -86,10 +87,14 @@ def make_segments(nodes_list: dict):
 if __name__ == '__main__':
     render = RenderCore('Vivania Core')
     Truck((640, 360), render, Worker('Jesus Sideral Carrión', 0.9), 0.9)
-    nodes_list = make_nodes()
-    segments_list = make_segments(nodes_list)
-    render.add_drawables(nodes_list.values())
-    render.add_drawables(segments_list.values())
+    nodes_dict = make_nodes()
+    segments_dict = make_segments(nodes_dict)
+    dijkstra = Dijkstras(nodes_dict)
+    print(dijkstra.get_graph())
+    print(dijkstra.naive_dijkstras('n6')[0])
+    print(dijkstra.naive_dijkstras('n6')[1])
+    render.add_drawables(nodes_dict.values())
+    render.add_drawables(segments_dict.values())
     render.render()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
