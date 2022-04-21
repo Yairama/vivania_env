@@ -26,7 +26,7 @@ class Dijkstras:
 
     # takes the graph and the starting node
     # returns a list of distances from the starting node to every other node
-    def naive_dijkstras(self, root):
+    def naive_dijkstra(self, root):
         graph = self.graph
         n = len(graph)
 
