@@ -4,7 +4,7 @@ import pygame
 
 
 class RenderCore(pygame.sprite.Group):
-    def __init__(self):
+    def __init__(self, render_name):
         super().__init__()
 
         pygame.init()
@@ -49,6 +49,8 @@ class RenderCore(pygame.sprite.Group):
         self.internal_offset = pygame.math.Vector2()
         self.internal_offset.x = self.internal_surf_size[0] // 2 - self.half_w
         self.internal_offset.y = self.internal_surf_size[1] // 2 - self.half_h
+
+        pygame.display.set_caption(render_name)
 
     def center_target_camera(self, target):
         self.offset.x = target.rect.centerx - self.half_w

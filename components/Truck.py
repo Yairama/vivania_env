@@ -1,8 +1,10 @@
 import pygame, sys
 
+from components.Worker import Worker
+
 
 class Truck(pygame.sprite.Sprite):
-    def __init__(self, pos, group):
+    def __init__(self, pos, group, worker: Worker, efficiency: float):
         super().__init__(group)
         self.image = pygame.image.load('resources/truck.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (60, 50))
