@@ -2,13 +2,15 @@ import sys
 
 import pygame
 
+from engine.utils import Dijkstra
+
 
 class RenderCore(pygame.sprite.Group):
-    def __init__(self, render_name):
+    def __init__(self, render_name, path_finder):
         super().__init__()
 
         pygame.init()
-
+        self.path_finder = path_finder
         # Screen information
         self.WIDTH = 1280
         self.HEIGHT = 720
@@ -16,9 +18,11 @@ class RenderCore(pygame.sprite.Group):
         pygame.event.set_grab(True)
         self.FPS = 60
         self.clock = pygame.time.Clock()
-        self.drawables = []
+        self.font = pygame.font.SysFont("Arial", 18)
+        self.drawables = {}
+        self.animation_speed = 60
         # self.display_surface = pygame.display.get_surface()
-
+        self.render_name = render_name
         # camera offset
         self.offset = pygame.math.Vector2()
         self.half_w = self.display_surface.get_size()[0] // 2
@@ -151,7 +155,8 @@ class RenderCore(pygame.sprite.Group):
 
             self.update()
             self.draw()
-
+            fps_text = self.font.render(f'{self.render_name} - {round(self.clock.get_fps())} FPS', False,(0,0,0))
+            self.display_surface.blit(fps_text, (10, 10))
             pygame.display.update()
             self.clock.tick(self.FPS)
 
@@ -164,14 +169,12 @@ class RenderCore(pygame.sprite.Group):
         # ground
         # ground_offset = self.ground_rect.topleft - self.offset + self.internal_offset
         # self.internal_surf.blit(self.ground_surf, ground_offset)
-
+        for item in self.drawables.values():
+            item.draw(self.internal_surf, (- self.offset + self.internal_offset))
         # active elements
         for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.offset + self.internal_offset
             self.internal_surf.blit(sprite.image, offset_pos)
-
-        for item in self.drawables:
-            item.draw(self.internal_surf, (- self.offset + self.internal_offset))
 
         scaled_surf = pygame.transform.scale(self.internal_surf, self.internal_surface_size_vector * self.zoom_scale)
         scaled_rect = scaled_surf.get_rect(center=(self.half_w, self.half_h))
@@ -184,5 +187,17 @@ class RenderCore(pygame.sprite.Group):
     def get_display_surface(self):
         return self.display_surface
 
-    def add_drawables(self, nodes_list):
-        self.drawables.extend(nodes_list)
+    def add_drawables(self, drawables: dict):
+        self.drawables.update(drawables)
+
+    def get_delta(self):
+        return self.clock.get_time()
+
+    def get_animation_speed(self):
+        return self.animation_speed
+
+    def get_drawables(self) -> dict:
+        return self.drawables
+
+    def find_path(self, node_root):
+        return self.path_finder.naive_dijkstra(node_root)[1]

@@ -85,17 +85,17 @@ def make_segments(nodes_list: dict):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    render = RenderCore('Vivania Core')
-
-    Truck((640, 360), render, Worker('Jesus Sideral Carrión', 0.9), 0.9)
-    Truck((400, 360), render, Worker('Pablo de los backyordigans', 0.9), 0.9)
-    Truck((200, 360), render, Worker('Carboncito presente RIP', 0.9), 0.9)
-
     nodes_dict = make_nodes()
     segments_dict = make_segments(nodes_dict)
     dijkstra = Dijkstras(nodes_dict)
-    render.add_drawables(nodes_dict.values())
-    render.add_drawables(segments_dict.values())
+    render = RenderCore('Vivania Core', dijkstra)
+
+    Truck(Vector3(91, 926, 0), render, Worker('Jesus Sideral Carrión', 0.9), 0.9)
+    #Truck(Vector3(400, 360, 0), render, Worker('Pablo de los backyordigans', 0.9), 0.9)
+    #Truck(Vector3(200, 360, 0), render, Worker('Carboncito presente RIP', 0.9), 0.9)
+
+    render.add_drawables(nodes_dict)
+    render.add_drawables(segments_dict)
     render.render()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
