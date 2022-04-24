@@ -4,6 +4,7 @@ import pygame, sys
 from pygame.math import Vector2, Vector3
 
 from components.Segment import Segment
+from components.Text import Text
 from components.Worker import Worker
 
 
@@ -11,7 +12,7 @@ class Truck(pygame.sprite.Sprite):
     def __init__(self, pos: Vector3, group, truck_id: int, worker: Worker, efficiency: float, payload=200):
         super().__init__(group)
         self.image = pygame.image.load('resources/truck.png').convert_alpha()
-        #self.image = pygame.transform.scale(self.image, (30 + (truck_id * truck_id), 20 + (truck_id * truck_id)))
+        # self.image = pygame.transform.scale(self.image, (30 + (truck_id * truck_id), 20 + (truck_id * truck_id)))
         self.image = pygame.transform.scale(self.image, (30, 20))
         self.pos = pos
         self.to = pos
@@ -27,7 +28,7 @@ class Truck(pygame.sprite.Sprite):
         self.worker = worker
 
         self.render = group
-
+        self.text = Text(self.render, f'Truck {self.truck_id}', 10, '#831010', 40, 12, self.pos)
         self.current_node_key = 'parking'
         self.next_node_key = 'parking'
         self.old_node_key = 'parking'
@@ -61,6 +62,9 @@ class Truck(pygame.sprite.Sprite):
         self.input()
 
         drawables = self.render.get_drawables()
+
+        if self.old_node_key == self.current_node_key == self.next_node_key:
+            self.speed = 0.
 
         # self.update_next_position(drawables)
         if self.pos == self.to:
@@ -96,6 +100,8 @@ class Truck(pygame.sprite.Sprite):
                 self.pos = self.to
                 self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
 
+        self.text.update_pos(self.pos)
+
     def move(self, to: Vector3):
         self.to = to
 
@@ -127,7 +133,7 @@ class Truck(pygame.sprite.Sprite):
                 if distance < 5:
                     self.speed = 0
                 elif 9 > distance >= 5:
-                    self.speed = list(dic.items())[truck_index - 1][1][0]/2
+                    self.speed = list(dic.items())[truck_index - 1][1][0] / 2
                 elif 15 >= distance >= 9:
                     self.speed = list(dic.items())[truck_index - 1][1][0]
                 else:
