@@ -90,9 +90,14 @@ if __name__ == '__main__':
     dijkstra = Dijkstras(nodes_dict)
     render = RenderCore('Vivania Core', dijkstra)
 
-    Truck(Vector3(91, 926, 0), render, Worker('Jesus Sideral Carrión', 0.9), 0.9)
-    #Truck(Vector3(400, 360, 0), render, Worker('Pablo de los backyordigans', 0.9), 0.9)
-    #Truck(Vector3(200, 360, 0), render, Worker('Carboncito presente RIP', 0.9), 0.9)
+    Truck(Vector3(91, 926, 0), render, 1, Worker('Jesus Sideral Carrión', 0.9), 0.6, 0)
+    Truck(Vector3(91, 926, 0), render, 2, Worker('Pablo de los backyordigans', 0.9), 0.7, 0)
+    Truck(Vector3(91, 926, 0), render, 3, Worker('Tyron de los backyordigans', 0.9), 0.7, 0)
+    Truck(Vector3(91, 926, 0), render, 4, Worker('Carboncito presente RIP', 0.9), 0.8, 0)
+    Truck(Vector3(91, 926, 0), render, 5, Worker('Barney tu 1', 0.9), 0.5, 0)
+    Truck(Vector3(91, 926, 0), render, 6, Worker('BArney tu 2', 0.9), 0.6, 0)
+    Truck(Vector3(91, 926, 0), render, 7, Worker('BArney tu 3', 0.9), 0.7, 0)
+    Truck(Vector3(91, 926, 0), render, 8, Worker('BArney tu 4', 0.9), 0.2, 0)
 
     render.add_drawables(nodes_dict)
     render.add_drawables(segments_dict)

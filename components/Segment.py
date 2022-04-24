@@ -11,6 +11,10 @@ class Segment:
         self.distance = (end_point - start_point).magnitude()
         self.empty_speed = empty_speed
         self.load_speed = load_speed
+        self.load_dict = {}
+        self.empty_dict = {}
+        self.first_loaded_truck_speed = 0
+        self.first_empty_truck_speed = 0
 
     def draw(self, internal_surface, offset):
         pygame.draw.line(internal_surface, color='#3443eb',
@@ -34,3 +38,27 @@ class Segment:
     def within(self, p, q, r):
         "Return true iff q is between p and r (inclusive)."
         return p <= q <= r or r <= q <= p
+
+    def get_speeds(self):
+        return self.load_speed, self.empty_speed
+
+    def update_queue(self, id_truck, speed, position, is_load):
+        if is_load:
+            self.load_dict[id_truck] = (speed, position)
+            self.first_loaded_truck_speed = list(self.load_dict.items())[0][1][0]
+        else:
+            self.empty_dict[id_truck] = (speed, position)
+            self.first_empty_truck_speed = list(self.empty_dict.items())[0][1][0]
+
+    def remove_from_queue(self, id_truck, is_load):
+        if id_truck in self.load_dict.keys() or id_truck in self.empty_dict.keys():
+            if is_load:
+                self.load_dict.pop(id_truck)
+            else:
+                self.empty_dict.pop(id_truck)
+
+    def get_load_dic(self):
+        return self.load_dict
+
+    def get_empty_dic(self):
+        return self.empty_dict
