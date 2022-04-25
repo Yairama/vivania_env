@@ -6,7 +6,7 @@ class Text(pygame.sprite.Sprite):
     def __init__(self, group, text, size, color, width, height, pos):
         # Call the parent class (Sprite) constructor
         super().__init__(group)
-        #pygame.sprite.Sprite.__init__(self)
+        # pygame.sprite.Sprite.__init__(self)
 
         self.font = pygame.font.SysFont("Arial", size)
         self.textSurf = self.font.render(text, 1, color)
@@ -18,5 +18,5 @@ class Text(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
 
     def update_pos(self, pos):
-        self.pos = pos + Vector3(20,15,0)
+        self.pos = pos + Vector3(20, 15, 0)
         self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))

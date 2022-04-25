@@ -20,6 +20,7 @@ class RenderCore(pygame.sprite.Group):
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Arial", 18)
         self.drawables = {}
+        self.shovels_dict = {}
         self.animation_speed = 60
         # self.display_surface = pygame.display.get_surface()
         self.render_name = render_name
@@ -196,8 +197,9 @@ class RenderCore(pygame.sprite.Group):
     def get_animation_speed(self):
         return self.animation_speed
 
-    def get_drawables(self) -> dict:
-        return self.drawables
-
     def find_path(self, node_root):
         return self.path_finder.naive_dijkstra(node_root)[1]
+
+    def set_shovels(self, shovels_dict):
+        self.shovels_dict = shovels_dict
+

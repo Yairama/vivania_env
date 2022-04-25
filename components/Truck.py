@@ -23,7 +23,7 @@ class Truck(pygame.sprite.Sprite):
         self.direction = Vector2()
         self.speed = 25
         self.payload = payload
-        self.is_load = False if payload == 0 else True
+        self.is_load = False
         self.efficiency = efficiency
         self.worker = worker
 
@@ -32,8 +32,10 @@ class Truck(pygame.sprite.Sprite):
         self.current_node_key = 'parking'
         self.next_node_key = 'parking'
         self.old_node_key = 'parking'
-        self.current_segment_key = ('parking', 'n1')
+        self.current_segment_key = ('parking', 'parking')
         self.path = []
+        self.current_load = 0
+        self.material_type = None
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -61,7 +63,25 @@ class Truck(pygame.sprite.Sprite):
     def update(self):
         self.input()
 
-        drawables = self.render.get_drawables()
+        drawables = self.render.drawables
+        timedelta = self.render.get_animation_speed()/1000
+
+        if self.old_node_key == self.current_node_key == self.next_node_key and self.speed == 0 and \
+                self.current_node_key in self.render.shovels_dict.keys() and self.is_load == False:
+            shovel = self.render.shovels_dict[self.current_node_key]
+            if shovel.current_truck is None and shovel.is_loading == False:
+                shovel.set_load_time(self.truck_id, self.payload)
+            if shovel.current_truck == self.truck_id and shovel.is_loading == True:
+                shovel.add_load_time(timedelta)
+                self.current_load = shovel.current_load
+                self.is_load = not shovel.is_loading
+                self.material_type = shovel.material_spot_type if self.is_load else None
+
+        if self.is_load:
+            if self.material_type == 'mineral':
+                self.move_to_node('crusher')
+            elif self.material_type == 'waste':
+                self.move_to_node('dump_zone')
 
         if self.old_node_key == self.current_node_key == self.next_node_key:
             self.speed = 0.
@@ -87,8 +107,6 @@ class Truck(pygame.sprite.Sprite):
         self.update_segment_parameters(drawables)
 
         if (self.to - self.pos).magnitude() != 0:
-            timedelta = self.render.get_animation_speed()
-            timedelta /= 1000
             speed = self.speed
             if ((self.to - self.pos).normalize() * timedelta * speed).length() < (
                     self.pos - self.to).length():
@@ -107,7 +125,7 @@ class Truck(pygame.sprite.Sprite):
 
     #    def update_next_position(self, drawables):
 
-    def move_to_node(self, to_node_key='n11'):
+    def move_to_node(self, to_node_key='c1'):
         self.path = self.render.find_path(self.current_node_key)[to_node_key]
 
     def update_segment_parameters(self, drawables):
@@ -143,10 +161,6 @@ class Truck(pygame.sprite.Sprite):
             if truck_index == 0:
                 self.speed = segment.get_speeds()[0] * self.efficiency * self.worker.efficiency if self.is_load else \
                     segment.get_speeds()[1] * self.efficiency * self.worker.efficiency
-
-    def set_payload(self, payload):
-        self.payload = payload
-        self.is_load = False if payload == 0 else True
 
     def get_id(self):
         return self.truck_id
