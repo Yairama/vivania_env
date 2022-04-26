@@ -5,11 +5,14 @@ from pygame.math import Vector2, Vector3
 
 from components.Segment import Segment
 from components.Text import Text
-from components.Worker import Worker
 
 
 class Truck(pygame.sprite.Sprite):
-    def __init__(self, pos: Vector3, group, truck_id: int, worker: Worker, efficiency: float, payload=200):
+    def __init__(self, pos: Vector3, group, truck_id: int, efficiency: float, payload=200):
+        """
+
+        :rtype: object
+        """
         super().__init__(group)
         self.image = pygame.image.load('resources/truck.png').convert_alpha()
         # self.image = pygame.transform.scale(self.image, (30 + (truck_id * truck_id), 20 + (truck_id * truck_id)))
@@ -25,7 +28,6 @@ class Truck(pygame.sprite.Sprite):
         self.payload = payload
         self.is_load = False
         self.efficiency = efficiency
-        self.worker = worker
 
         self.render = group
         self.text = Text(self.render, f'Truck {self.truck_id}', 10, '#831010', 40, 12, self.pos)
@@ -47,8 +49,8 @@ class Truck(pygame.sprite.Sprite):
             # self.move(Vector3(320, 302, 0))
 
         elif keys[pygame.K_DOWN]:
-            if self.truck_id == 2:
-                self.move_to_node()
+
+            self.move_to_node('n1')
             # self.direction.y = 1
         else:
             self.direction.y = 0
@@ -138,8 +140,8 @@ class Truck(pygame.sprite.Sprite):
                         drawables[key].update_queue(self.truck_id, self.speed, self.pos, self.is_load)
 
     def update_speed(self, segment: Segment):
-        self.speed = segment.get_speeds()[0] * self.efficiency * self.worker.efficiency if self.is_load else \
-            segment.get_speeds()[1] * self.efficiency * self.worker.efficiency
+        self.speed = segment.get_speeds()[0] * self.efficiency if self.is_load else \
+            segment.get_speeds()[1] * self.efficiency
 
         if self.truck_id in segment.get_load_dic().keys() or self.truck_id in segment.get_empty_dic().keys():
             dic = segment.get_load_dic() if self.is_load else segment.get_empty_dic()
@@ -155,12 +157,12 @@ class Truck(pygame.sprite.Sprite):
                 elif 15 >= distance >= 9:
                     self.speed = list(dic.items())[truck_index - 1][1][0]
                 else:
-                    self.speed = segment.get_speeds()[0] * self.efficiency * self.worker.efficiency if self.is_load \
-                        else segment.get_speeds()[1] * self.efficiency * self.worker.efficiency
+                    self.speed = segment.get_speeds()[0] * self.efficiency if self.is_load \
+                        else segment.get_speeds()[1] * self.efficiency
 
             if truck_index == 0:
-                self.speed = segment.get_speeds()[0] * self.efficiency * self.worker.efficiency if self.is_load else \
-                    segment.get_speeds()[1] * self.efficiency * self.worker.efficiency
+                self.speed = segment.get_speeds()[0] * self.efficiency if self.is_load else \
+                    segment.get_speeds()[1] * self.efficiency
 
     def get_id(self):
         return self.truck_id

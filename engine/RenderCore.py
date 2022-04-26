@@ -28,9 +28,10 @@ class RenderCore(pygame.sprite.Group):
         self.offset = pygame.math.Vector2()
         self.half_w = self.display_surface.get_size()[0] // 2
         self.half_h = self.display_surface.get_size()[1] // 2
+        self.window_pixel_matrix = None
 
         # box setup
-        self.camera_borders = {'left': 200, 'right': 200, 'top': 100, 'bottom': 100}
+        self.camera_borders = {'left': 50, 'right': 50, 'top': 50, 'bottom': 50}
         l = self.camera_borders['left']
         t = self.camera_borders['top']
         w = self.display_surface.get_size()[0] - (self.camera_borders['left'] + self.camera_borders['right'])
@@ -43,17 +44,17 @@ class RenderCore(pygame.sprite.Group):
 
         # camera speed
         self.keyboard_speed = 5
-        self.mouse_speed = 0.2
+        self.mouse_speed = 0.5
 
         # zoom
-        self.zoom_scale = 1
+        self.zoom_scale = 0.9
         self.internal_surf_size = (2500, 2500)
         self.internal_surf = pygame.Surface(self.internal_surf_size, pygame.SRCALPHA)
         self.internal_rect = self.internal_surf.get_rect(center=(self.half_w, self.half_h))
         self.internal_surface_size_vector = pygame.math.Vector2(self.internal_surf_size)
         self.internal_offset = pygame.math.Vector2()
-        self.internal_offset.x = self.internal_surf_size[0] // 2 - self.half_w
-        self.internal_offset.y = self.internal_surf_size[1] // 2 - self.half_h
+        self.internal_offset.x = self.internal_surf_size[0] // 2 - self.half_w + 220
+        self.internal_offset.y = self.internal_surf_size[1] // 2 - self.half_h - 270
 
         pygame.display.set_caption(render_name)
 
@@ -134,32 +135,29 @@ class RenderCore(pygame.sprite.Group):
             self.zoom_scale -= 0.1
 
     def render(self, **kwargs):
-
         # self.center_target_camera(player)
         # self.box_target_camera(player)
         # self.keyboard_control()
-
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
 
-                if event.type == pygame.MOUSEWHEEL:
-                    self.zoom_scale += event.y * 0.03
+            if event.type == pygame.MOUSEWHEEL:
+                self.zoom_scale += event.y * 0.03
 
-            self.display_surface.fill('#FFFFFF')
+        self.display_surface.fill('#FFFFFF')
 
-            self.update()
-            self.draw()
-            fps_text = self.font.render(f'{self.render_name} - {round(self.clock.get_fps())} FPS', False,(0,0,0))
-            self.display_surface.blit(fps_text, (10, 10))
-            pygame.display.update()
-            self.clock.tick(self.FPS)
+        self.update()
+        self.draw()
+        fps_text = self.font.render(f'{self.render_name} - {round(self.clock.get_fps())} FPS', False,(0,0,0))
+        self.display_surface.blit(fps_text, (10, 10))
+        pygame.display.update()
+        self.clock.tick(self.FPS)
 
     def draw(self):
         self.mouse_control()
@@ -181,6 +179,7 @@ class RenderCore(pygame.sprite.Group):
         scaled_rect = scaled_surf.get_rect(center=(self.half_w, self.half_h))
 
         self.display_surface.blit(scaled_surf, scaled_rect)
+        self.window_pixel_matrix = pygame.surfarray.array3d(self.display_surface)
 
     def get_internal_surface(self):
         return self.internal_surf
@@ -202,4 +201,7 @@ class RenderCore(pygame.sprite.Group):
 
     def set_shovels(self, shovels_dict):
         self.shovels_dict = shovels_dict
+
+    def get_pixel_image(self):
+        return self.window_pixel_matrix
 
