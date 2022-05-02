@@ -61,10 +61,6 @@ class VivaniaEnv(Env):
             self.render_core.render()
             return self.render_core.get_pixel_image()
 
-    def close(self):
-        pygame.quit()
-        self.render_core = None
-
     def make_nodes(self):
         # Use a breakpoint in the code line below to debug your script.
 
@@ -125,13 +121,60 @@ class VivaniaEnv(Env):
 
     def make_segments(self, nodes_list: dict):
         segments_list = {}
-        for key in nodes_list.keys():
-            start = nodes_list[key].get_coords()
-            for sub_node_key in nodes_list[key].get_neighborhoods():
-                end = nodes_list[sub_node_key].get_coords()
-                if segments_list.get((key, sub_node_key)) is None and segments_list.get((sub_node_key, key)) is None:
-                    segments_list[(key, sub_node_key)] = Segment(start, end, random.uniform(24., 30.),
-                                                                 random.uniform(12., 18.))
+        # for key in nodes_list.keys():
+        #     start = nodes_list[key].get_coords()
+        #     for sub_node_key in nodes_list[key].get_neighborhoods():
+        #         end = nodes_list[sub_node_key].get_coords()
+        #         if segments_list.get((key, sub_node_key)) is None and segments_list.get((sub_node_key, key)) is None:
+        #             segments_list[(key, sub_node_key)] = Segment(start, end, random.uniform(24., 30.),
+        #                                                          random.uniform(12., 18.))
+        segments_list[('parking', 'n2')] = Segment(nodes_list['parking'].get_coords(), nodes_list['n2'].get_coords(),
+                                                   random.uniform(24., 30.), random.uniform(12., 18.), ('parking', 'n2'))
+        segments_list[('crusher', 'n1')] = Segment(nodes_list['crusher'].get_coords(), nodes_list['n1'].get_coords(),
+                                                   random.uniform(24., 30.), random.uniform(12., 18.), ('crusher', 'n1'))
+        segments_list[('n1', 'n2')] = Segment(nodes_list['n1'].get_coords(), nodes_list['n2'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n1', 'n2'))
+        segments_list[('n2', 'n3')] = Segment(nodes_list['n2'].get_coords(), nodes_list['n3'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n2', 'n3'))
+        segments_list[('n3', 'n4')] = Segment(nodes_list['n3'].get_coords(), nodes_list['n4'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n3', 'n4'))
+        segments_list[('n4', 'n5')] = Segment(nodes_list['n4'].get_coords(), nodes_list['n5'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n4', 'n5'))
+        segments_list[('n5', 'n6')] = Segment(nodes_list['n5'].get_coords(), nodes_list['n6'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n5', 'n6'))
+        segments_list[('n5', 'c1')] = Segment(nodes_list['n5'].get_coords(), nodes_list['c1'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n5', 'c1'))
+        segments_list[('n5', 'dump_zone')] = Segment(nodes_list['n5'].get_coords(),
+                                                     nodes_list['dump_zone'].get_coords(),
+                                                     random.uniform(24., 30.), random.uniform(12., 18.), ('n5', 'dump_zone'))
+        segments_list[('n6', 'n7')] = Segment(nodes_list['n6'].get_coords(), nodes_list['n7'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n6', 'n7'))
+        segments_list[('n7', 'n8')] = Segment(nodes_list['n7'].get_coords(), nodes_list['n8'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n7', 'n8'))
+        segments_list[('n8', 'n9')] = Segment(nodes_list['n8'].get_coords(), nodes_list['n9'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n8', 'n9'))
+        segments_list[('n8', 'c2')] = Segment(nodes_list['n8'].get_coords(), nodes_list['c2'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n8', 'c2'))
+        segments_list[('n9', 'n10')] = Segment(nodes_list['n9'].get_coords(), nodes_list['n10'].get_coords(),
+                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n9', 'n10'))
+        segments_list[('n9', 'c3')] = Segment(nodes_list['n9'].get_coords(), nodes_list['c3'].get_coords(),
+                                              random.uniform(24., 30.), random.uniform(12., 18.), ('n9', 'c3'))
+        segments_list[('n10', 'n11')] = Segment(nodes_list['n10'].get_coords(), nodes_list['n11'].get_coords(),
+                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n10', 'n11'))
+        segments_list[('n11', 'n12')] = Segment(nodes_list['n11'].get_coords(), nodes_list['n12'].get_coords(),
+                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n11', 'n12'))
+        segments_list[('n12', 'n13')] = Segment(nodes_list['n12'].get_coords(), nodes_list['n13'].get_coords(),
+                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n12', 'n13'))
+        segments_list[('n13', 'c4')] = Segment(nodes_list['n13'].get_coords(), nodes_list['c4'].get_coords(),
+                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n13', 'c4'))
+        segments_list[('n14', 'n15')] = Segment(nodes_list['n14'].get_coords(), nodes_list['n15'].get_coords(),
+                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n14', 'n15'))
+        segments_list[('n15', 'n16')] = Segment(nodes_list['n15'].get_coords(), nodes_list['n16'].get_coords(),
+                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n15', 'n16'))
+        segments_list[('n16', 'c5')] = Segment(nodes_list['n16'].get_coords(), nodes_list['c5'].get_coords(),
+                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n16', 'c5'))
+        segments_list[('n16', 'c6')] = Segment(nodes_list['n16'].get_coords(), nodes_list['c6'].get_coords(),
+                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n16', 'c6'))
 
         return segments_list
 
@@ -144,7 +187,7 @@ class VivaniaEnv(Env):
 
     def make_trucks(self, render):
         trucks_dict = {
-            1: Truck(Vector3(91, 926, 0), render, 1, 0.65, 200),
+            1: Truck(Vector3(91, 926, 0), render, 1, 0.68, 200),
             2: Truck(Vector3(91, 926, 0), render, 2, 0.75, 200),
             3: Truck(Vector3(91, 926, 0), render, 3, 0.9, 200),
             4: Truck(Vector3(91, 926, 0), render, 4, 0.89, 200),

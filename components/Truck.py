@@ -23,7 +23,7 @@ class Truck(pygame.sprite.Sprite):
         self.target_node = 'n1'
         self.old_pos = self.pos
         self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
-        self.direction = Vector2()
+        self.direction = None
         self.speed = 25
         self.payload = payload
         self.is_load = False
@@ -38,52 +38,54 @@ class Truck(pygame.sprite.Sprite):
         self.path = []
         self.current_load = 0
         self.material_type = None
+        self.counter = 0
 
     def input(self):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_UP]:
-            self.direction.y = -1
-            if True:
-                self.move_to_node()
+            self.counter += 1
+            if self.counter == 1:
+                self.move_to_node('c1')
             # self.move(Vector3(320, 302, 0))
-
         elif keys[pygame.K_DOWN]:
-
-            self.move_to_node('n1')
+            self.counter += 1
+            if self.counter == 1:
+                self.move_to_node('n1')
             # self.direction.y = 1
         else:
-            self.direction.y = 0
+            self.counter = 0
 
-        if keys[pygame.K_RIGHT]:
-            self.direction.x = 1
-        elif keys[pygame.K_LEFT]:
-            self.direction.x = -1
-        else:
-            self.direction.x = 0
+        # if keys[pygame.K_RIGHT]:
+        #     pass
+        # elif keys[pygame.K_LEFT]:
+        #     pass
+        # else:
+        #     self.counter = 0
 
     def update(self):
         self.input()
 
         drawables = self.render.drawables
-        timedelta = self.render.get_animation_speed()/1000
+        timedelta = self.render.get_animation_speed() / 1000
+        self.direction = (self.current_node_key, self.next_node_key)
 
         if self.old_node_key == self.current_node_key == self.next_node_key and self.speed == 0 and \
-                self.current_node_key in self.render.shovels_dict.keys() and self.is_load == False:
+                self.current_node_key in self.render.shovels_dict.keys() and self.is_load is False:
             shovel = self.render.shovels_dict[self.current_node_key]
-            if shovel.current_truck is None and shovel.is_loading == False:
+            if shovel.current_truck is None and shovel.is_loading is False:
                 shovel.set_load_time(self.truck_id, self.payload)
-            if shovel.current_truck == self.truck_id and shovel.is_loading == True:
+            if shovel.current_truck == self.truck_id and shovel.is_loading is True:
                 shovel.add_load_time(timedelta)
                 self.current_load = shovel.current_load
                 self.is_load = not shovel.is_loading
                 self.material_type = shovel.material_spot_type if self.is_load else None
 
-        if self.is_load:
-            if self.material_type == 'mineral':
-                self.move_to_node('crusher')
-            elif self.material_type == 'waste':
-                self.move_to_node('dump_zone')
+        # if self.is_load:
+        #     if self.material_type == 'mineral':
+        #         self.move_to_node('crusher')
+        #     elif self.material_type == 'waste':
+        #         self.move_to_node('dump_zone')
 
         if self.old_node_key == self.current_node_key == self.next_node_key:
             self.speed = 0.
@@ -94,11 +96,11 @@ class Truck(pygame.sprite.Sprite):
                 if type(key) == tuple:
                     if (key[0] == self.current_node_key or key[1] == self.current_node_key) and (
                             key[0] == self.old_node_key or key[1] == self.old_node_key):
-                        drawables[key].remove_from_queue(self.truck_id, self.is_load)
+                        drawables[key].remove_from_queue(self.truck_id, self.direction)
 
                 if type(key) == str:
                     if drawables[key].get_coords() == self.pos:
-                        if self.current_node_key in self.path:
+                        if self.current_node_key in self.path and self.path.index(self.current_node_key)==0:
                             self.path.remove(self.current_node_key)
                         self.old_node_key = copy(self.current_node_key)
                         self.current_node_key = key
@@ -121,14 +123,23 @@ class Truck(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
 
         self.text.update_pos(self.pos)
-
-    def move(self, to: Vector3):
-        self.to = to
-
+        if self.truck_id == 1:
+            print(self.old_node_key, self.current_node_key, self.next_node_key)
     #    def update_next_position(self, drawables):
 
-    def move_to_node(self, to_node_key='c1'):
-        self.path = self.render.find_path(self.current_node_key)[to_node_key]
+    def move_to_node(self, to_node_key):
+        # if self.truck_id == 1:
+        #     print(self.render.find_path(self.next_node_key))
+        #     print(self.old_node_key, self.current_node_key, self.next_node_key)
+        self.path = self.render.find_path(self.next_node_key)[to_node_key]
+        self.path.insert(0, self.next_node_key)
+        # if self.truck_id == 1:
+        #     print(self.path)
+        #     print(self.old_node_key, self.current_node_key, self.next_node_key)
+        # if len(self.path) > 0:
+        #     self.old_node_key = self.current_node_key
+        #     self.current_node_key = self.next_node_key
+        #     self.next_node_key = self.path[0]
 
     def update_segment_parameters(self, drawables):
         if self.current_node_key != self.next_node_key:
@@ -137,14 +148,17 @@ class Truck(pygame.sprite.Sprite):
                     if (key[0] == self.current_node_key or key[1] == self.current_node_key) and (
                             key[0] == self.next_node_key or key[1] == self.next_node_key):
                         self.update_speed(drawables[key])
-                        drawables[key].update_queue(self.truck_id, self.speed, self.pos, self.is_load)
+                        drawables[key].update_queue(self.truck_id, self.speed, self.pos, self.direction)
 
     def update_speed(self, segment: Segment):
+
         self.speed = segment.get_speeds()[0] * self.efficiency if self.is_load else \
             segment.get_speeds()[1] * self.efficiency
+        dic = segment.get_dic(self.direction)
 
-        if self.truck_id in segment.get_load_dic().keys() or self.truck_id in segment.get_empty_dic().keys():
-            dic = segment.get_load_dic() if self.is_load else segment.get_empty_dic()
+        if dic is None:
+            return
+        if self.truck_id in dic.keys():
             truck_index = list(dic.keys()).index(self.truck_id)
 
             if (len(dic.keys()) > 1 and truck_index != 0 and list(dic.items())[truck_index - 1][1][0] < self.speed) or \
