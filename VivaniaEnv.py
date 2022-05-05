@@ -13,6 +13,7 @@ import time
 from gym.core import ObsType, ActType
 from pygame.math import Vector3
 
+from components.Crusher import Crusher
 from components.Node import Node
 from components.Segment import Segment
 from components.Shovel import Shovel
@@ -27,23 +28,60 @@ class VivaniaEnv(Env):
         super(VivaniaEnv, self).__init__()
         # Define a 2-D observation space
         self.reward = 0.
+        self.info = []
         self.observation_shape = (1280, 720, 3)
         self.observation_space = spaces.Box(low=np.float32(np.zeros(self.observation_shape)),
                                             high=np.float32(np.ones(self.observation_shape)),
                                             dtype=np.float32)
 
         # Define an action space ranging from 0 to 4
-        self.action_space = spaces.Discrete(6, )
+        self.action_space = spaces.MultiDiscrete([9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9])
 
         # Define elements present inside the environment
         self.elements = []
         self.render_core = None
-        self.trucks_dict = dict
+        self.trucks_list = list
+        self.nodes_to = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'crusher', 'dump_zone']
 
-    def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
-        pass
+        self.score = 0.
+
+    def step(self, action):
+        done = False
+
+        assert self.action_space.contains(action), "Invalid Action"
+
+        reward = -1
+
+        for i in range(len(action)):
+            act = action[i]
+
+            if act == 8:
+                continue
+            else:
+                truck = self.trucks_list[i]
+                truck.move_to_node(self.nodes_to[act])
+
+
+        # for act in action:
+        #     for truck in trucks:
+        #         if act == 8:
+        #             continue
+        #         else:
+        #             truck.move_to_node(self.nodes_to[act])
+        #             if truck.get_id() == 1:
+        #                 print(truck.pos)
+        #                 print(truck.path)
+
+        self.score -= .1
+
+        if self.score <= -1000.:
+            done = True
+
+        return self.render_core.get_pixel_image(), reward, done, []
 
     def reset(self):
+        self.reward = 0.
+        self.info = []
         nodes_dict = self.make_nodes()
         segments_dict = self.make_segments(nodes_dict)
         dijkstra = Dijkstras(nodes_dict)
@@ -51,7 +89,10 @@ class VivaniaEnv(Env):
         self.render_core.add_drawables(nodes_dict)
         self.render_core.add_drawables(segments_dict)
         self.render_core.set_shovels(self.make_shovels(self.render_core))
-        self.trucks_dict = self.make_trucks(self.render_core)
+        self.render_core.set_dumps(self.make_dumps(self.render_core))
+        self.render_core.load_spots = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+        self.render_core.dump_spots = ['dump_zone', 'crusher']
+        self.trucks_list = self.make_trucks(self.render_core)
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""
@@ -129,9 +170,11 @@ class VivaniaEnv(Env):
         #             segments_list[(key, sub_node_key)] = Segment(start, end, random.uniform(24., 30.),
         #                                                          random.uniform(12., 18.))
         segments_list[('parking', 'n2')] = Segment(nodes_list['parking'].get_coords(), nodes_list['n2'].get_coords(),
-                                                   random.uniform(24., 30.), random.uniform(12., 18.), ('parking', 'n2'))
+                                                   random.uniform(24., 30.), random.uniform(12., 18.),
+                                                   ('parking', 'n2'))
         segments_list[('crusher', 'n1')] = Segment(nodes_list['crusher'].get_coords(), nodes_list['n1'].get_coords(),
-                                                   random.uniform(24., 30.), random.uniform(12., 18.), ('crusher', 'n1'))
+                                                   random.uniform(24., 30.), random.uniform(12., 18.),
+                                                   ('crusher', 'n1'))
         segments_list[('n1', 'n2')] = Segment(nodes_list['n1'].get_coords(), nodes_list['n2'].get_coords(),
                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n1', 'n2'))
         segments_list[('n2', 'n3')] = Segment(nodes_list['n2'].get_coords(), nodes_list['n3'].get_coords(),
@@ -146,7 +189,8 @@ class VivaniaEnv(Env):
                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n5', 'c1'))
         segments_list[('n5', 'dump_zone')] = Segment(nodes_list['n5'].get_coords(),
                                                      nodes_list['dump_zone'].get_coords(),
-                                                     random.uniform(24., 30.), random.uniform(12., 18.), ('n5', 'dump_zone'))
+                                                     random.uniform(24., 30.), random.uniform(12., 18.),
+                                                     ('n5', 'dump_zone'))
         segments_list[('n6', 'n7')] = Segment(nodes_list['n6'].get_coords(), nodes_list['n7'].get_coords(),
                                               random.uniform(24., 30.), random.uniform(12., 18.), ('n6', 'n7'))
         segments_list[('n7', 'n8')] = Segment(nodes_list['n7'].get_coords(), nodes_list['n8'].get_coords(),
@@ -165,6 +209,8 @@ class VivaniaEnv(Env):
                                                 random.uniform(24., 30.), random.uniform(12., 18.), ('n11', 'n12'))
         segments_list[('n12', 'n13')] = Segment(nodes_list['n12'].get_coords(), nodes_list['n13'].get_coords(),
                                                 random.uniform(24., 30.), random.uniform(12., 18.), ('n12', 'n13'))
+        segments_list[('n12', 'n14')] = Segment(nodes_list['n12'].get_coords(), nodes_list['n14'].get_coords(),
+                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n12', 'n14'))
         segments_list[('n13', 'c4')] = Segment(nodes_list['n13'].get_coords(), nodes_list['c4'].get_coords(),
                                                random.uniform(24., 30.), random.uniform(12., 18.), ('n13', 'c4'))
         segments_list[('n14', 'n15')] = Segment(nodes_list['n14'].get_coords(), nodes_list['n15'].get_coords(),
@@ -185,6 +231,10 @@ class VivaniaEnv(Env):
                         'c1': Shovel(group, 'Shovel c1', 'c1', 40, 0.9)}
         return shovels_dict
 
+    def make_dumps(self, group):
+        dumps_dict = {'crusher': Crusher(group, 'Crusher', 'crusher', 1)}
+        return dumps_dict
+
     def make_trucks(self, render):
         trucks_dict = {
             1: Truck(Vector3(91, 926, 0), render, 1, 0.68, 200),
@@ -202,4 +252,7 @@ class VivaniaEnv(Env):
             13: Truck(Vector3(91, 926, 0), render, 13, 0.76, 200),
             14: Truck(Vector3(91, 926, 0), render, 14, 0.83, 200),
         }
-        return trucks_dict
+        return list(trucks_dict.values())
+
+    # def close(self):
+    #     self.render_core.quit()

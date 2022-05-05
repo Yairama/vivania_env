@@ -18,9 +18,10 @@ class RenderCore(pygame.sprite.Group):
         pygame.event.set_grab(True)
         self.FPS = 60
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont("Arial", 18)
+        self.font = pygame.font.SysFont("Comic Sans MS", 18)
         self.drawables = {}
         self.shovels_dict = {}
+        self.dumps_dict = {}
         self.animation_speed = 60
         # self.display_surface = pygame.display.get_surface()
         self.render_name = render_name
@@ -55,6 +56,13 @@ class RenderCore(pygame.sprite.Group):
         self.internal_offset = pygame.math.Vector2()
         self.internal_offset.x = self.internal_surf_size[0] // 2 - self.half_w + 220
         self.internal_offset.y = self.internal_surf_size[1] // 2 - self.half_h - 270
+
+        self.load_spots = list
+        self.dump_spots = list
+        self.tonnage = 0.
+        self.score = 0.
+        self.queue = 0.
+        self.hang = 0.
 
         pygame.display.set_caption(render_name)
 
@@ -146,22 +154,25 @@ class RenderCore(pygame.sprite.Group):
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-
-            if event.type == pygame.MOUSEWHEEL:
-                self.zoom_scale += event.y * 0.03
+            # if event.type == pygame.MOUSEWHEEL:
+            #     self.zoom_scale += event.y * 0.03
 
         self.display_surface.fill('#FFFFFF')
 
         self.update()
         self.draw()
-        fps_text = self.font.render(f'{self.render_name} - {round(self.clock.get_fps())} FPS', False,(0,0,0))
+        fps_text = self.font.render(f'{self.render_name} - {round(self.clock.get_fps())} FPS', False, (0, 0, 0))
         self.display_surface.blit(fps_text, (10, 10))
+        stats_text = self.font.render(f'Score: {round(self.score,1)}'
+                                      f' // Total Queue:{round(self.queue,1)} // Total Hang: {round(self.hang,1)} '
+                                      f'// Total Tonnage: {self.tonnage}', False, (0, 0, 0))
+        self.display_surface.blit(stats_text, (self.WIDTH-610, self.HEIGHT - 50))
         pygame.display.update()
         self.clock.tick(self.FPS)
 
     def draw(self):
-        self.mouse_control()
-        self.zoom_keyboard_control()
+        # self.mouse_control()
+        # self.zoom_keyboard_control()
 
         self.internal_surf.fill('#BBBBBB')
 
@@ -202,6 +213,12 @@ class RenderCore(pygame.sprite.Group):
     def set_shovels(self, shovels_dict):
         self.shovels_dict = shovels_dict
 
+    def set_dumps(self, dumps_dict):
+        self.dumps_dict = dumps_dict
+
     def get_pixel_image(self):
         return self.window_pixel_matrix
 
+    def quit(self):
+        pygame.quit()
+        sys.exit()

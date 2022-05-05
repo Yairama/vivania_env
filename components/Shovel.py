@@ -29,7 +29,8 @@ class Shovel(pygame.sprite.Sprite):
         self.material_spot_type = self.render.drawables[self.node].material
 
     def update(self):
-        pass
+        if not self.is_loading:
+            self.render.hang += self.render.animation_speed/1000
 
     def set_load_time(self, truck_id, payload):
         self.current_loading_time = 0

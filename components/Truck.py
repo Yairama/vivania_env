@@ -3,6 +3,7 @@ from copy import copy
 import pygame, sys
 from pygame.math import Vector2, Vector3
 
+from components.Crusher import Crusher
 from components.Segment import Segment
 from components.Text import Text
 
@@ -30,13 +31,13 @@ class Truck(pygame.sprite.Sprite):
         self.efficiency = efficiency
 
         self.render = group
-        self.text = Text(self.render, f'Truck {self.truck_id}', 10, '#831010', 40, 12, self.pos)
         self.current_node_key = 'parking'
         self.next_node_key = 'parking'
         self.old_node_key = 'parking'
         self.current_segment_key = ('parking', 'parking')
         self.path = []
         self.current_load = 0
+        self.text = Text(self.render, f'{self.truck_id} - {self.current_load}', 10, '#831010', 40, 12, self.pos)
         self.material_type = None
         self.counter = 0
 
@@ -64,14 +65,16 @@ class Truck(pygame.sprite.Sprite):
         #     self.counter = 0
 
     def update(self):
-        self.input()
+        #self.input()
 
         drawables = self.render.drawables
         timedelta = self.render.get_animation_speed() / 1000
         self.direction = (self.current_node_key, self.next_node_key)
 
-        if self.old_node_key == self.current_node_key == self.next_node_key and self.speed == 0 and \
-                self.current_node_key in self.render.shovels_dict.keys() and self.is_load is False:
+        if self.current_node_key in self.render.load_spots or self.current_node_key in self.render.dump_spots:
+            self.speed = 0.
+
+        if self.current_node_key in self.render.load_spots and self.is_load is False and self.speed == 0:
             shovel = self.render.shovels_dict[self.current_node_key]
             if shovel.current_truck is None and shovel.is_loading is False:
                 shovel.set_load_time(self.truck_id, self.payload)
@@ -80,6 +83,19 @@ class Truck(pygame.sprite.Sprite):
                 self.current_load = shovel.current_load
                 self.is_load = not shovel.is_loading
                 self.material_type = shovel.material_spot_type if self.is_load else None
+            return
+
+        if self.current_node_key in self.render.dump_spots and self.speed == 0 and self.is_load:
+            dump = self.render.dumps_dict[self.current_node_key]
+            if dump.type == 'crusher':
+                dump: Crusher = self.render.dumps_dict[self.current_node_key]
+                if dump.current_truck is None and dump.is_dumping is False:
+                    dump.set_dump_time(self.truck_id, self.current_load)
+                if dump.current_truck == self.truck_id and dump.is_dumping is True:
+                    dump.add_dump_time(timedelta)
+                    self.current_load = dump.current_load
+                    self.is_load = not dump.is_dumping
+                return
 
         # if self.is_load:
         #     if self.material_type == 'mineral':
@@ -87,8 +103,6 @@ class Truck(pygame.sprite.Sprite):
         #     elif self.material_type == 'waste':
         #         self.move_to_node('dump_zone')
 
-        if self.old_node_key == self.current_node_key == self.next_node_key:
-            self.speed = 0.
 
         # self.update_next_position(drawables)
         if self.pos == self.to:
@@ -122,9 +136,7 @@ class Truck(pygame.sprite.Sprite):
                 self.pos = self.to
                 self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
 
-        self.text.update_pos(self.pos)
-        if self.truck_id == 1:
-            print(self.old_node_key, self.current_node_key, self.next_node_key)
+        self.text.update_in(self.pos, f'{self.truck_id} - {round(self.current_load)}')
     #    def update_next_position(self, drawables):
 
     def move_to_node(self, to_node_key):
