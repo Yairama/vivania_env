@@ -14,6 +14,7 @@ from gym.core import ObsType, ActType
 from pygame.math import Vector3
 
 from components.Crusher import Crusher
+from components.Dump import Dump
 from components.Node import Node
 from components.Segment import Segment
 from components.Shovel import Shovel
@@ -60,6 +61,7 @@ class VivaniaEnv(Env):
             else:
                 truck = self.trucks_list[i]
                 truck.move_to_node(self.nodes_to[act])
+                #truck.move_to_node('c1')
 
 
         # for act in action:
@@ -74,7 +76,7 @@ class VivaniaEnv(Env):
 
         self.score -= .1
 
-        if self.score <= -1000.:
+        if self.score <= -10000.:
             done = True
 
         return self.render_core.get_pixel_image(), reward, done, []
@@ -232,7 +234,9 @@ class VivaniaEnv(Env):
         return shovels_dict
 
     def make_dumps(self, group):
-        dumps_dict = {'crusher': Crusher(group, 'Crusher', 'crusher', 1)}
+        dumps_dict = {'crusher': Crusher(group, 'Crusher', 'crusher'),
+                      'dump_zone': Dump(group, 'Dump', 'dump_zone')
+                      }
         return dumps_dict
 
     def make_trucks(self, render):

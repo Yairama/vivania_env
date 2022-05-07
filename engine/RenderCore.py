@@ -18,7 +18,7 @@ class RenderCore(pygame.sprite.Group):
         pygame.event.set_grab(True)
         self.FPS = 60
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont("Comic Sans MS", 18)
+        self.font = pygame.font.SysFont("Comic Sans MS", 12)
         self.drawables = {}
         self.shovels_dict = {}
         self.dumps_dict = {}
@@ -59,6 +59,8 @@ class RenderCore(pygame.sprite.Group):
 
         self.load_spots = list
         self.dump_spots = list
+        self.waste_tonnes = 0.
+        self.mineral_tonnes = 0.
         self.tonnage = 0.
         self.score = 0.
         self.queue = 0.
@@ -165,7 +167,7 @@ class RenderCore(pygame.sprite.Group):
         self.display_surface.blit(fps_text, (10, 10))
         stats_text = self.font.render(f'Score: {round(self.score,1)}'
                                       f' // Total Queue:{round(self.queue,1)} // Total Hang: {round(self.hang,1)} '
-                                      f'// Total Tonnage: {self.tonnage}', False, (0, 0, 0))
+                                      f'// Total Tonnage: {round(self.waste_tonnes+self.mineral_tonnes)}', False, (0, 0, 0))
         self.display_surface.blit(stats_text, (self.WIDTH-610, self.HEIGHT - 50))
         pygame.display.update()
         self.clock.tick(self.FPS)
