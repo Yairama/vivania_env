@@ -40,7 +40,7 @@ class VivaniaEnv(Env):
 
         # Define elements present inside the environment
         self.elements = []
-        self.render_core = None
+        self.render_core: RenderCore = None
         self.trucks_list = list
         self.nodes_to = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'crusher', 'dump_zone']
 
@@ -74,9 +74,9 @@ class VivaniaEnv(Env):
         #                 print(truck.pos)
         #                 print(truck.path)
 
-        self.score -= .1
+        self.render_core.score -= 0.00001
 
-        if self.score <= -10000.:
+        if self.score <= -1000.:
             done = True
 
         return self.render_core.get_pixel_image(), reward, done, []

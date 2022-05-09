@@ -75,8 +75,8 @@ class Truck(pygame.sprite.Sprite):
         self.direction = (self.current_node_key, self.next_node_key)
 
         if not self.is_loading and self.speed == 0:
-            print(self.is_loading, self.current_node_key)
             self.render.queue += timedelta
+            self.render.score -= timedelta*0.5
 
         if self.current_node_key in self.render.load_spots or self.current_node_key in self.render.dump_spots:
             self.speed = 0.
