@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 
 from VivaniaEnv import VivaniaEnv
+import cv2
 
 if __name__ == '__main__':
     env = VivaniaEnv()
@@ -10,8 +11,8 @@ if __name__ == '__main__':
         action = env.action_space.sample()
         obs, reward, done, info = env.step(action)
 
-        env.render(mode="human")
-
+        img_bgr = env.render(mode="human")
+        cv2.imshow('Vivania Core',img_bgr)
         if done:
             break
 

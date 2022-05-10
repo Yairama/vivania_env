@@ -1,9 +1,9 @@
 import sys
 
 import pygame
-
 from engine.utils import Dijkstra
-
+import os, sys
+import cv2
 
 class RenderCore(pygame.sprite.Group):
     def __init__(self, render_name, path_finder):
@@ -14,7 +14,7 @@ class RenderCore(pygame.sprite.Group):
         # Screen information
         self.WIDTH = 1280
         self.HEIGHT = 720
-        self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT), flags=pygame.HIDDEN)
         pygame.event.set_grab(True)
         self.FPS = 60
         self.clock = pygame.time.Clock()
@@ -40,7 +40,7 @@ class RenderCore(pygame.sprite.Group):
         self.camera_rect = pygame.Rect(l, t, w, h)
 
         # # ground
-        # self.ground_surf = pygame.image.load('resources/truck.png').convert_alpha()
+        # self.ground_surf = pygame.image.load('resources/empty_truck.png').convert_alpha()
         # self.ground_rect = self.ground_surf.get_rect(topleft=(0, 0))
 
         # camera speed
@@ -171,6 +171,10 @@ class RenderCore(pygame.sprite.Group):
         self.display_surface.blit(stats_text, (self.WIDTH-610, self.HEIGHT - 50))
         pygame.display.update()
         self.clock.tick(self.FPS)
+        self.window_pixel_matrix = pygame.surfarray.array3d(self.display_surface)
+        self.window_pixel_matrix = self.window_pixel_matrix.transpose([1, 0, 2])
+        self.window_pixel_matrix = cv2.cvtColor(self.window_pixel_matrix, cv2.COLOR_RGB2BGR)
+
 
     def draw(self):
         # self.mouse_control()
@@ -192,7 +196,6 @@ class RenderCore(pygame.sprite.Group):
         scaled_rect = scaled_surf.get_rect(center=(self.half_w, self.half_h))
 
         self.display_surface.blit(scaled_surf, scaled_rect)
-        self.window_pixel_matrix = pygame.surfarray.array3d(self.display_surface)
 
     def get_internal_surface(self):
         return self.internal_surf

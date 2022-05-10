@@ -1,5 +1,7 @@
+import math
 from copy import copy
 
+import numpy as np
 import pygame, sys
 from pygame.math import Vector2, Vector3
 
@@ -17,16 +19,18 @@ class Truck(pygame.sprite.Sprite):
         :rtype: object
         """
         super().__init__(group)
-        self.image = pygame.image.load('resources/truck.png').convert_alpha()
-        # self.image = pygame.transform.scale(self.image, (30 + (truck_id * truck_id), 20 + (truck_id * truck_id)))
-        self.image = pygame.transform.scale(self.image, (30, 20))
+        self.or_empty_image = pygame.image.load('resources/empty_truck.png').convert_alpha()
+        self.or_empty_image = pygame.transform.scale(self.or_empty_image, (30, 20))
+        self.or_load_image = pygame.image.load('resources/loaded_truck.png').convert_alpha()
+        self.or_load_image = pygame.transform.scale(self.or_load_image, (30, 20))
+        self.image = copy(self.or_empty_image)
         self.pos = pos
         self.to = pos
         self.truck_id = truck_id
         self.target_node = 'n1'
         self.old_pos = self.pos
         self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
-        self.direction = None
+        self.orientation = None
         self.speed = 25
         self.payload = payload
         self.is_load = False
@@ -43,6 +47,8 @@ class Truck(pygame.sprite.Sprite):
         self.material_type = None
         self.counter = 0
         self.is_loading = False
+        # self.direction = None
+        # self.old_direction = None
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -56,7 +62,6 @@ class Truck(pygame.sprite.Sprite):
             self.counter += 1
             if self.counter == 1:
                 self.move_to_node('n1')
-            # self.direction.y = 1
         else:
             self.counter = 0
 
@@ -72,7 +77,7 @@ class Truck(pygame.sprite.Sprite):
 
         drawables = self.render.drawables
         timedelta = self.render.get_animation_speed() / 1000
-        self.direction = (self.current_node_key, self.next_node_key)
+        self.orientation = (self.current_node_key, self.next_node_key)
 
         if not self.is_loading and self.speed == 0:
             self.render.queue += timedelta
@@ -124,7 +129,7 @@ class Truck(pygame.sprite.Sprite):
                 if type(key) == tuple:
                     if (key[0] == self.current_node_key or key[1] == self.current_node_key) and (
                             key[0] == self.old_node_key or key[1] == self.old_node_key):
-                        drawables[key].remove_from_queue(self.truck_id, self.direction)
+                        drawables[key].remove_from_queue(self.truck_id, self.orientation)
 
                 if type(key) == str:
                     if drawables[key].get_coords() == self.pos:
@@ -136,9 +141,7 @@ class Truck(pygame.sprite.Sprite):
                             self.next_node_key = self.path[0]
                             self.to = drawables[self.path.pop(0)].get_coords()
 
-
         self.update_segment_parameters(drawables)
-
 
         if (self.to - self.pos).magnitude() != 0:
             speed = self.speed
@@ -146,29 +149,29 @@ class Truck(pygame.sprite.Sprite):
                     self.pos - self.to).length():
                 self.old_pos = copy(self.pos)
                 self.pos = self.pos + (self.to - self.pos).normalize() * timedelta * speed
-                self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
             else:
                 self.old_pos = copy(self.pos)
                 self.pos = self.to
-                self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
+
+            # direction = self.to-self.pos
+            # old_direction = self.pos-self.old_pos
+            #
+            # if direction.length() != 0 and old_direction.length() != 0:
+            #     rotation = Vector3(0,-180,0).angle_to(old_direction.normalize())
+            #     if not math.isnan(rotation):
+            #         print(rotation)
+            #         self.image = pygame.transform.rotate(self.or_image, rotation)
+            if self.is_load:
+                self.image = self.or_load_image
+            else:
+                self.image = self.or_empty_image
+            self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
 
         self.text.update_in(self.pos, f'{self.truck_id} - {round(self.current_load)}')
 
-    #    def update_next_position(self, drawables):
-
     def move_to_node(self, to_node_key):
-        # if self.truck_id == 1:
-        #     print(self.render.find_path(self.next_node_key))
-        #     print(self.old_node_key, self.current_node_key, self.next_node_key)
         self.path = self.render.find_path(self.next_node_key)[to_node_key]
         self.path.insert(0, self.next_node_key)
-        # if self.truck_id == 1:
-        #     print(self.path)
-        #     print(self.old_node_key, self.current_node_key, self.next_node_key)
-        # if len(self.path) > 0:
-        #     self.old_node_key = self.current_node_key
-        #     self.current_node_key = self.next_node_key
-        #     self.next_node_key = self.path[0]
 
     def update_segment_parameters(self, drawables):
         if self.current_node_key != self.next_node_key:
@@ -177,13 +180,13 @@ class Truck(pygame.sprite.Sprite):
                     if (key[0] == self.current_node_key or key[1] == self.current_node_key) and (
                             key[0] == self.next_node_key or key[1] == self.next_node_key):
                         self.update_speed(drawables[key])
-                        drawables[key].update_queue(self.truck_id, self.speed, self.pos, self.direction)
+                        drawables[key].update_queue(self.truck_id, self.speed, self.pos, self.orientation)
 
     def update_speed(self, segment: Segment):
 
         self.speed = segment.get_speeds()[0] * self.efficiency if self.is_load else \
             segment.get_speeds()[1] * self.efficiency
-        dic = segment.get_dic(self.direction)
+        dic = segment.get_dic(self.orientation)
 
         if dic is None:
             return

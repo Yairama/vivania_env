@@ -5,13 +5,13 @@ from pygame.math import Vector3
 
 class Segment:
 
-    def __init__(self, start_point: Vector3, end_point: Vector3, empty_speed, load_speed, direction):
+    def __init__(self, start_point: Vector3, end_point: Vector3, empty_speed, load_speed, orientation):
         self.start_point = start_point
         self.end_point = end_point
         self.distance = (end_point - start_point).magnitude()
         self.empty_speed = empty_speed
         self.load_speed = load_speed
-        self.direction = direction
+        self.orientation = orientation
         self.a_dict = {}
         self.b_dict = {}
         self.first_loaded_truck_speed = 0
@@ -43,24 +43,24 @@ class Segment:
     def get_speeds(self):
         return self.load_speed, self.empty_speed
 
-    def update_queue(self, id_truck, speed, position, truck_direction):
-        if truck_direction == self.direction:
+    def update_queue(self, id_truck, speed, position, truck_orientation):
+        if truck_orientation == self.orientation:
             self.a_dict[id_truck] = (speed, position)
             self.first_loaded_truck_speed = list(self.a_dict.items())[0][1][0]
-        elif truck_direction == (self.direction[1], self.direction[0]):
+        elif truck_orientation == (self.orientation[1], self.orientation[0]):
             self.b_dict[id_truck] = (speed, position)
             self.first_empty_truck_speed = list(self.b_dict.items())[0][1][0]
 
-    def remove_from_queue(self, id_truck, truck_direction):
+    def remove_from_queue(self, id_truck, truck_orientation):
         if id_truck in self.a_dict.keys() or id_truck in self.b_dict.keys():
-            if truck_direction == self.direction:
+            if truck_orientation == self.orientation:
                 self.a_dict.pop(id_truck)
-            elif truck_direction == (self.direction[1], self.direction[0]):
+            elif truck_orientation == (self.orientation[1], self.orientation[0]):
                 self.b_dict.pop(id_truck)
 
-    def get_dic(self, truck_direction):
+    def get_dic(self, truck_orientation):
 
-        if truck_direction == self.direction:
+        if truck_orientation == self.orientation:
             return self.a_dict
-        elif truck_direction == (self.direction[1], self.direction[0]):
+        elif truck_orientation == (self.orientation[1], self.orientation[0]):
             return self.b_dict

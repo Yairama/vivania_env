@@ -76,7 +76,7 @@ class VivaniaEnv(Env):
 
         self.render_core.score -= 0.00001
 
-        if self.score <= -1000.:
+        if self.score <= -700.:
             done = True
 
         return self.render_core.get_pixel_image(), reward, done, []
@@ -100,6 +100,7 @@ class VivaniaEnv(Env):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""
         if mode == "human":
             self.render_core.render()
+            return self.render_core.get_pixel_image()
         elif mode == "rgb_array":
             self.render_core.render()
             return self.render_core.get_pixel_image()
