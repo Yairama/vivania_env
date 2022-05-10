@@ -3,7 +3,7 @@ import sys
 import pygame
 from engine.utils import Dijkstra
 import os, sys
-import cv2
+#import cv2
 
 class RenderCore(pygame.sprite.Group):
     def __init__(self, render_name, path_finder):
@@ -173,7 +173,7 @@ class RenderCore(pygame.sprite.Group):
         self.clock.tick(self.FPS)
         self.window_pixel_matrix = pygame.surfarray.array3d(self.display_surface)
         self.window_pixel_matrix = self.window_pixel_matrix.transpose([1, 0, 2])
-        self.window_pixel_matrix = cv2.cvtColor(self.window_pixel_matrix, cv2.COLOR_RGB2BGR)
+        #self.window_pixel_matrix = cv2.cvtColor(self.window_pixel_matrix, cv2.COLOR_RGB2BGR)
 
 
     def draw(self):
