@@ -5,7 +5,7 @@ from engine.utils import Dijkstra
 import os, sys
 
 class RenderCore(pygame.sprite.Group):
-    def __init__(self, render_name, path_finder):
+    def __init__(self, render_name, path_finder, hidden):
         super().__init__()
 
         pygame.init()
@@ -13,7 +13,10 @@ class RenderCore(pygame.sprite.Group):
         # Screen information
         self.WIDTH = 1280
         self.HEIGHT = 720
-        self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT), flags=pygame.HIDDEN)
+        if hidden:
+            self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT), flags=pygame.HIDDEN)
+        else:
+            self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.event.set_grab(True)
         self.FPS = 60
         self.clock = pygame.time.Clock()

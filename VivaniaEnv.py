@@ -25,8 +25,10 @@ from engine.utils.Dijkstra import Dijkstras
 
 class VivaniaEnv(Env):
 
-    def __init__(self):
+    def __init__(self, hidden):
         super(VivaniaEnv, self).__init__()
+        print("************** Created Vivavia's Environment **************")
+        print(f"Showing screen: {hidden}")
         # Define a 2-D observation space
         self.reward = 0.
         self.info = []
@@ -34,7 +36,7 @@ class VivaniaEnv(Env):
         self.observation_space = spaces.Box(low=np.float32(np.zeros(self.observation_shape)),
                                             high=np.float32(np.ones(self.observation_shape)),
                                             dtype=np.float32)
-
+        self.hidden = hidden
         # Define an action space ranging from 0 to 4
         self.action_space = spaces.MultiDiscrete([9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9])
 
@@ -78,7 +80,6 @@ class VivaniaEnv(Env):
 
         if self.score <= -700.:
             done = True
-
         return self.render_core.get_pixel_image(), reward, done, []
 
     def reset(self):
@@ -87,7 +88,7 @@ class VivaniaEnv(Env):
         nodes_dict = self.make_nodes()
         segments_dict = self.make_segments(nodes_dict)
         dijkstra = Dijkstras(nodes_dict)
-        self.render_core = RenderCore('Vivania Core', dijkstra)
+        self.render_core = RenderCore('Vivania Core', dijkstra, self.hidden)
         self.render_core.add_drawables(nodes_dict)
         self.render_core.add_drawables(segments_dict)
         self.render_core.set_shovels(self.make_shovels(self.render_core))
