@@ -1,6 +1,7 @@
 from typing import Optional, Union, Tuple
 import os, sys
-sys.path.insert(0,'vivania_env')
+
+sys.path.insert(0, 'vivania_env')
 import numpy as np
 import matplotlib.pyplot as plt
 import PIL.Image as Image
@@ -29,24 +30,28 @@ class VivaniaEnv(Env):
     def __init__(self, hidden):
         super(VivaniaEnv, self).__init__()
         print("************** Created Vivavia's Environment **************")
-        print(f"Showing screen: {hidden}")
+        print(f"Hiding screen: {hidden}")
         # Define a 2-D observation space
         self.reward = 0.
         self.info = []
-        self.observation_shape = (1280, 720, 3)
-        self.observation_space = spaces.Box(low=np.float32(np.zeros(self.observation_shape)),
-                                            high=np.float32(np.ones(self.observation_shape)),
+
+        """
+        Obs orden definition
+        for n trucks should be:
+        np.tile([is_loading, is_dumping, speed, material_type, tonnage],(n,1))
+        """
+        self.observation_space = spaces.Box(low=np.float32(np.tile([0, 0, 0, 0, 0], (14, 1))),
+                                            high=np.float32(np.tile([1, 1, 30, 3, 300], (14, 1))),
                                             dtype=np.float32)
         self.hidden = hidden
         # Define an action space ranging from 0 to 8
         self._max_episode_steps = 10000
-        self.action_space = spaces.MultiDiscrete([9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9])
-
+        self.action_space = spaces.MultiDiscrete([10] * 14)
         # Define elements present inside the environment
         self.elements = []
         self.render_core: RenderCore = None
         self.trucks_list = list
-        self.nodes_to = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'crusher', 'dump_zone']
+        self.nodes_to = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'crusher', 'dump_zone', 'parking']
 
         self.score = 0.
 
@@ -56,17 +61,28 @@ class VivaniaEnv(Env):
         assert self.action_space.contains(action), "Invalid Action"
 
         reward = -1
-
+        obs = []
         for i in range(len(action)):
             act = action[i]
-
-            if act == 8:
+            truck = self.trucks_list[i]
+            if act == 9:
                 continue
             else:
-                truck = self.trucks_list[i]
                 truck.move_to_node(self.nodes_to[act])
-                #truck.move_to_node('c1')
 
+            is_loading = int(truck.is_loading)
+            is_dumping = int(truck.is_dumping)
+            speed = truck.speed
+            material_type = truck.material_type
+            if material_type == 'mineral':
+                material_type = 0
+            elif material_type == 'waste':
+                material_type = 1
+            else:
+                material_type = 2
+            tonnage = truck.current_load
+            obs.append([is_loading, is_dumping, speed, material_type, tonnage])
+            # truck.move_to_node('c1')
 
         # for act in action:
         #     for truck in trucks:
@@ -82,7 +98,7 @@ class VivaniaEnv(Env):
 
         if self.score <= -700.:
             done = True
-        return self.render_core.get_pixel_image(), reward, done, []
+        return obs, reward, done, []
 
     def reset(self):
         self.reward = 0.
@@ -99,7 +115,7 @@ class VivaniaEnv(Env):
         self.render_core.dump_spots = ['dump_zone', 'crusher']
         self.trucks_list = self.make_trucks(self.render_core)
 
-        return self.render_core.get_pixel_image()
+        return np.tile([0, 0, 0, 0, 0], (14, 1))
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""

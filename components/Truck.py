@@ -47,6 +47,7 @@ class Truck(pygame.sprite.Sprite):
         self.material_type = None
         self.counter = 0
         self.is_loading = False
+        self.is_dumping = False
         # self.direction = None
         # self.old_direction = None
 
@@ -79,7 +80,7 @@ class Truck(pygame.sprite.Sprite):
         timedelta = self.render.get_animation_speed() / 1000
         self.orientation = (self.current_node_key, self.next_node_key)
 
-        if not self.is_loading and self.speed == 0:
+        if (not self.is_loading or not self.is_dumping) and self.speed == 0:
             self.render.queue += timedelta
             self.render.score -= timedelta*0.5
 
@@ -104,27 +105,32 @@ class Truck(pygame.sprite.Sprite):
             if dump.type == 'crusher' and self.is_load:
                 if dump.current_truck is None and dump.is_dumping is False:
                     dump.set_dump_time(self.truck_id, self.current_load)
+                    self.is_dumping = True
                 if dump.current_truck == self.truck_id and dump.is_dumping is True:
                     dump.add_dump_time(timedelta, self.material_type)
                     self.current_load = dump.current_load
                     self.is_load = False if self.current_load == 0 else True
                     if not self.is_load:
                         self.material_type = 'none'
+                        self.is_dumping = False
                 return
 
             if dump.type == 'dump_zone' and self.is_load:
                 if self.truck_id not in dump.trucks_times.keys():
                     dump.set_dump_time(self.truck_id, self.current_load, self.material_type)
                     dump.add_dump_time(self.truck_id, timedelta)
+                    self.is_dumping = True
                 elif dump.trucks_times[self.truck_id][0] == 0:
                     dump.set_dump_time(self.truck_id, self.current_load, self.material_type)
                     dump.add_dump_time(self.truck_id, timedelta)
+                    self.is_dumping = True
                 elif dump.trucks_times[self.truck_id][0] != 0 and dump.trucks_times[self.truck_id][2]:
                     dump.add_dump_time(self.truck_id, timedelta)
                     self.is_load = dump.trucks_times[self.truck_id][2]
                     self.current_load = dump.trucks_times[self.truck_id][3]
                     if not self.is_load:
                         self.material_type = 'none'
+                        self.is_dumping = False
                 return
 
         if self.pos == self.to:
