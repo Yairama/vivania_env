@@ -19,9 +19,9 @@ class Truck(pygame.sprite.Sprite):
         :rtype: object
         """
         super().__init__(group)
-        self.or_empty_image = pygame.image.load('resources/empty_truck.png').convert_alpha()
+        self.or_empty_image = pygame.image.load('vivania_env/resources/empty_truck.png').convert_alpha()
         self.or_empty_image = pygame.transform.scale(self.or_empty_image, (30, 20))
-        self.or_load_image = pygame.image.load('resources/loaded_truck.png').convert_alpha()
+        self.or_load_image = pygame.image.load('vivania_env/resources/loaded_truck.png').convert_alpha()
         self.or_load_image = pygame.transform.scale(self.or_load_image, (30, 20))
         self.image = copy(self.or_empty_image)
         self.pos = pos
@@ -108,6 +108,8 @@ class Truck(pygame.sprite.Sprite):
                     dump.add_dump_time(timedelta, self.material_type)
                     self.current_load = dump.current_load
                     self.is_load = False if self.current_load == 0 else True
+                    if not self.is_load:
+                        self.material_type = 'none'
                 return
 
             if dump.type == 'dump_zone' and self.is_load:
@@ -121,6 +123,8 @@ class Truck(pygame.sprite.Sprite):
                     dump.add_dump_time(self.truck_id, timedelta)
                     self.is_load = dump.trucks_times[self.truck_id][2]
                     self.current_load = dump.trucks_times[self.truck_id][3]
+                    if not self.is_load:
+                        self.material_type = 'none'
                 return
 
         if self.pos == self.to:

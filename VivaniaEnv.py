@@ -1,5 +1,6 @@
 from typing import Optional, Union, Tuple
-
+import os, sys
+sys.path.insert(0,'vivania_env')
 import numpy as np
 import matplotlib.pyplot as plt
 import PIL.Image as Image
@@ -37,7 +38,8 @@ class VivaniaEnv(Env):
                                             high=np.float32(np.ones(self.observation_shape)),
                                             dtype=np.float32)
         self.hidden = hidden
-        # Define an action space ranging from 0 to 4
+        # Define an action space ranging from 0 to 8
+        self._max_episode_steps = 10000
         self.action_space = spaces.MultiDiscrete([9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9])
 
         # Define elements present inside the environment
@@ -96,6 +98,8 @@ class VivaniaEnv(Env):
         self.render_core.load_spots = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
         self.render_core.dump_spots = ['dump_zone', 'crusher']
         self.trucks_list = self.make_trucks(self.render_core)
+
+        return self.render_core.get_pixel_image()
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""
@@ -262,3 +266,6 @@ class VivaniaEnv(Env):
 
     # def close(self):
     #     self.render_core.quit()
+    @property
+    def max_episode_steps(self):
+        return self._max_episode_steps
