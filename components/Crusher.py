@@ -48,8 +48,10 @@ class Crusher(pygame.sprite.Sprite):
             if material == 'mineral':
                 self.render.mineral_tonnes += self.current_load
                 self.render.score += 2*self.current_load
+                self.render.reward += 2 * self.current_load
             elif material == 'waste':
                 self.render.waste_tonnes += self.current_load
                 self.render.score -= self.current_load
+                self.render.reward -= self.current_load
             self.current_load = 0
             self.current_dumping_time = 0

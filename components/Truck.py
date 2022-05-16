@@ -83,11 +83,13 @@ class Truck(pygame.sprite.Sprite):
         if (not self.is_loading or not self.is_dumping) and self.speed == 0:
             self.render.queue += timedelta
             self.render.score -= timedelta*0.5
+            self.render.reward -= timedelta * 0.5
 
         if self.current_node_key in self.render.load_spots or self.current_node_key in self.render.dump_spots:
             self.speed = 0.
 
-        if self.current_node_key in self.render.load_spots and self.is_load is False and self.speed == 0:
+        if self.current_node_key in self.render.load_spots and self.is_load is False and self.speed == 0 and self.current_node_key in self.render.shovels_dict:
+
             shovel = self.render.shovels_dict[self.current_node_key]
             if shovel.current_truck is None and shovel.is_loading is False:
                 self.is_loading = True

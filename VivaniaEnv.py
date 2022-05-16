@@ -34,40 +34,39 @@ class VivaniaEnv(Env):
         # Define a 2-D observation space
         self.reward = 0.
         self.info = []
-
+        self.amount_of_trucks = 25
         """
         Obs orden definition
         for n trucks should be:
         np.tile([is_loading, is_dumping, speed, material_type, tonnage],(n,1))
         """
-        self.observation_space = spaces.Box(low=np.float32(np.tile([0, 0, 0, 0, 0], (14, 1))),
-                                            high=np.float32(np.tile([1, 1, 30, 3, 300], (14, 1))),
+        self.observation_space = spaces.Box(low=np.float32(np.tile([0, 0, 0, 0, 0], (self.amount_of_trucks, 1))),
+                                            high=np.float32(np.tile([1, 1, 30, 3, 300], (self.amount_of_trucks, 1))),
                                             dtype=np.float32)
         self.hidden = hidden
         # Define an action space ranging from 0 to 8
-        self._max_episode_steps = 10000
-        self.action_space = spaces.MultiDiscrete([10] * 14)
+        self._max_episode_steps = 500
+        self.current_step = 0
+        self.action_space = spaces.MultiDiscrete([9] * self.amount_of_trucks)
         # Define elements present inside the environment
         self.elements = []
         self.render_core: RenderCore = None
         self.trucks_list = list
-        self.nodes_to = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'crusher', 'dump_zone', 'parking']
+        self.nodes_to = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'crusher', 'dump_zone']
 
         self.score = 0.
 
     def step(self, action):
+        self.render(mode="human")
         done = False
-
+        self.current_step += 1
         assert self.action_space.contains(action), "Invalid Action"
 
-        reward = -1
         obs = []
         for i in range(len(action)):
             act = action[i]
             truck = self.trucks_list[i]
-            if act == 9:
-                continue
-            else:
+            if act != 8:
                 truck.move_to_node(self.nodes_to[act])
 
             is_loading = int(truck.is_loading)
@@ -93,14 +92,23 @@ class VivaniaEnv(Env):
         #             if truck.get_id() == 1:
         #                 print(truck.pos)
         #                 print(truck.path)
+        self.reward = self.render_core.reward
+        self.render_core.reward -= 0.00001
 
         self.render_core.score -= 0.00001
+        self.score = self.render_core.score
 
-        if self.score <= -700.:
+        # if self.score <= -500.:
+        #     done = True
+
+        if self.current_step > 1000:
             done = True
-        return obs, reward, done, []
+
+
+        return obs, self.reward, done, []
 
     def reset(self):
+        self.current_step = 0
         self.reward = 0.
         self.info = []
         nodes_dict = self.make_nodes()
@@ -115,7 +123,7 @@ class VivaniaEnv(Env):
         self.render_core.dump_spots = ['dump_zone', 'crusher']
         self.trucks_list = self.make_trucks(self.render_core)
 
-        return np.tile([0, 0, 0, 0, 0], (14, 1))
+        return np.tile([0, 0, 0, 0, 0], (self.amount_of_trucks, 1))
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""
@@ -249,7 +257,9 @@ class VivaniaEnv(Env):
         return segments_list
 
     def make_shovels(self, group):
-        shovels_dict = {'c4': Shovel(group, 'Shovel c4', 'c4', 40, 0.9),
+        shovels_dict = {'c6': Shovel(group, 'Shovel c6', 'c6', 40, 0.9),
+                        'c5': Shovel(group, 'Shovel c5', 'c5', 40, 0.9),
+                        'c4': Shovel(group, 'Shovel c4', 'c4', 40, 0.9),
                         'c3': Shovel(group, 'Shovel c3', 'c3', 40, 0.9),
                         'c2': Shovel(group, 'Shovel c2', 'c2', 40, 0.9),
                         'c1': Shovel(group, 'Shovel c1', 'c1', 40, 0.9)}
@@ -277,6 +287,17 @@ class VivaniaEnv(Env):
             12: Truck(Vector3(91, 926, 0), render, 12, 0.99, 200),
             13: Truck(Vector3(91, 926, 0), render, 13, 0.76, 200),
             14: Truck(Vector3(91, 926, 0), render, 14, 0.83, 200),
+            15: Truck(Vector3(91, 926, 0), render, 15, 0.84, 200),
+            16: Truck(Vector3(91, 926, 0), render, 16, 0.95, 200),
+            17: Truck(Vector3(91, 926, 0), render, 17, 0.99, 200),
+            18: Truck(Vector3(91, 926, 0), render, 18, 0.76, 200),
+            19: Truck(Vector3(91, 926, 0), render, 19, 0.83, 200),
+            20: Truck(Vector3(91, 926, 0), render, 20, 0.89, 200),
+            21: Truck(Vector3(91, 926, 0), render, 21, 0.79, 200),
+            22: Truck(Vector3(91, 926, 0), render, 22, 0.81, 200),
+            23: Truck(Vector3(91, 926, 0), render, 23, 0.77, 200),
+            24: Truck(Vector3(91, 926, 0), render, 24, 0.85, 200),
+            25: Truck(Vector3(91, 926, 0), render, 25, 0.70, 200)
         }
         return list(trucks_dict.values())
 

@@ -17,14 +17,14 @@ class RenderCore(pygame.sprite.Group):
             self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT), flags=pygame.HIDDEN)
         else:
             self.display_surface = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
-        pygame.event.set_grab(True)
+        #pygame.event.set_grab(True)
         self.FPS = 60
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Comic Sans MS", 12)
         self.drawables = {}
         self.shovels_dict = {}
         self.dumps_dict = {}
-        self.animation_speed = 60
+        self.animation_speed = 300
         # self.display_surface = pygame.display.get_surface()
         self.render_name = render_name
         # camera offset
@@ -65,6 +65,7 @@ class RenderCore(pygame.sprite.Group):
         self.mineral_tonnes = 0.
         self.tonnage = 0.
         self.score = 0.
+        self.reward = 0.
         self.queue = 0.
         self.hang = 0.
 
@@ -150,6 +151,7 @@ class RenderCore(pygame.sprite.Group):
         # self.center_target_camera(player)
         # self.box_target_camera(player)
         # self.keyboard_control()
+        self.reward = 0.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
