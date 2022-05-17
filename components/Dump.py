@@ -37,6 +37,6 @@ class Dump(pygame.sprite.Sprite):
                 self.render.reward += self.trucks_times[truck_id][3]
             elif self.trucks_times[truck_id][4] == 'mineral':
                 self.render.mineral_tonnes += self.trucks_times[truck_id][3]
-                self.render.score -= 2.*self.trucks_times[truck_id][3]
-                self.render.reward -= 2. * self.trucks_times[truck_id][3]
-            self.trucks_times[truck_id] = [0, random.uniform(0.008, 0.026), False, 0]
+                self.render.score -= 3.*self.trucks_times[truck_id][3]
+                self.render.reward -= 3. * self.trucks_times[truck_id][3]
+            self.trucks_times[truck_id] = [0, random.uniform(0.008, 0.026), False, 0, 'none']

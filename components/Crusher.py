@@ -39,19 +39,17 @@ class Crusher(pygame.sprite.Sprite):
         self.dump_time = random.uniform(0.008, 0.026)
 
     def add_dump_time(self, timedelta, material):
-        if self.current_load == 0:
-            self.is_dumping = False
-            self.current_truck = None
-            return
         self.current_dumping_time += timedelta * self.dump_time
         if self.current_dumping_time >= self.dump_time:
             if material == 'mineral':
                 self.render.mineral_tonnes += self.current_load
-                self.render.score += 2*self.current_load
-                self.render.reward += 2 * self.current_load
+                self.render.score += 4*self.current_load
+                self.render.reward += 4 * self.current_load
             elif material == 'waste':
                 self.render.waste_tonnes += self.current_load
                 self.render.score -= self.current_load
                 self.render.reward -= self.current_load
             self.current_load = 0
             self.current_dumping_time = 0
+            self.is_dumping = False
+            self.current_truck = None

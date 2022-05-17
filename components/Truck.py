@@ -19,10 +19,12 @@ class Truck(pygame.sprite.Sprite):
         :rtype: object
         """
         super().__init__(group)
-        self.or_empty_image = pygame.image.load('vivania_env/resources/empty_truck.png').convert_alpha()
+        self.or_empty_image = pygame.image.load('vivania_env/resources/empty_truck2.png').convert_alpha()
         self.or_empty_image = pygame.transform.scale(self.or_empty_image, (30, 20))
-        self.or_load_image = pygame.image.load('vivania_env/resources/loaded_truck.png').convert_alpha()
-        self.or_load_image = pygame.transform.scale(self.or_load_image, (30, 20))
+        self.or_waste_load_image = pygame.image.load('vivania_env/resources/waste_loaded_truck.png').convert_alpha()
+        self.or_waste_load_image = pygame.transform.scale(self.or_waste_load_image, (30, 20))
+        self.or_mineral_load_image = pygame.image.load('vivania_env/resources/mineral_loaded_truck.png').convert_alpha()
+        self.or_mineral_load_image = pygame.transform.scale(self.or_mineral_load_image, (30, 20))
         self.image = copy(self.or_empty_image)
         self.pos = pos
         self.to = pos
@@ -82,7 +84,7 @@ class Truck(pygame.sprite.Sprite):
 
         if (not self.is_loading or not self.is_dumping) and self.speed == 0:
             self.render.queue += timedelta
-            self.render.score -= timedelta*0.5
+            self.render.score -= timedelta * 0.5
             self.render.reward -= timedelta * 0.5
 
         if self.current_node_key in self.render.load_spots or self.current_node_key in self.render.dump_spots:
@@ -111,10 +113,13 @@ class Truck(pygame.sprite.Sprite):
                 if dump.current_truck == self.truck_id and dump.is_dumping is True:
                     dump.add_dump_time(timedelta, self.material_type)
                     self.current_load = dump.current_load
-                    self.is_load = False if self.current_load == 0 else True
+                    if self.current_load == 0:
+                        self.is_load = False
+                    else:
+                        self.is_load = True
                     if not self.is_load:
-                        self.material_type = 'none'
                         self.is_dumping = False
+                        self.material_type = 'none'
                 return
 
             if dump.type == 'dump_zone' and self.is_load:
@@ -131,8 +136,8 @@ class Truck(pygame.sprite.Sprite):
                     self.is_load = dump.trucks_times[self.truck_id][2]
                     self.current_load = dump.trucks_times[self.truck_id][3]
                     if not self.is_load:
-                        self.material_type = 'none'
                         self.is_dumping = False
+                        self.material_type = 'none'
                 return
 
         if self.pos == self.to:
@@ -174,7 +179,10 @@ class Truck(pygame.sprite.Sprite):
             #         print(rotation)
             #         self.image = pygame.transform.rotate(self.or_image, rotation)
             if self.is_load:
-                self.image = self.or_load_image
+                if self.material_type == 'mineral':
+                    self.image = self.or_mineral_load_image
+                elif self.material_type == 'waste':
+                    self.image = self.or_waste_load_image
             else:
                 self.image = self.or_empty_image
             self.rect = self.image.get_rect(center=Vector2(self.pos.x, self.pos.y))
@@ -182,6 +190,10 @@ class Truck(pygame.sprite.Sprite):
         self.text.update_in(self.pos, f'{self.truck_id} - {round(self.current_load)}')
 
     def move_to_node(self, to_node_key):
+        if self.current_load > 0 and self.is_load and to_node_key in self.render.load_spots:
+            return
+        if not self.is_load and to_node_key in self.render.dump_spots:
+            return
         self.path = self.render.find_path(self.next_node_key)[to_node_key]
         self.path.insert(0, self.next_node_key)
 

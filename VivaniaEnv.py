@@ -47,7 +47,7 @@ class VivaniaEnv(Env):
         # Define an action space ranging from 0 to 8
         self._max_episode_steps = 500
         self.current_step = 0
-        self.action_space = spaces.MultiDiscrete([9] * self.amount_of_trucks)
+        self.action_space = spaces.MultiDiscrete([8] * self.amount_of_trucks)
         # Define elements present inside the environment
         self.elements = []
         self.render_core: RenderCore = None
@@ -61,13 +61,12 @@ class VivaniaEnv(Env):
         done = False
         self.current_step += 1
         assert self.action_space.contains(action), "Invalid Action"
-
         obs = []
         for i in range(len(action)):
             act = action[i]
             truck = self.trucks_list[i]
-            if act != 8:
-                truck.move_to_node(self.nodes_to[act])
+
+            truck.move_to_node(self.nodes_to[act])
 
             is_loading = int(truck.is_loading)
             is_dumping = int(truck.is_dumping)
@@ -98,12 +97,11 @@ class VivaniaEnv(Env):
         self.render_core.score -= 0.00001
         self.score = self.render_core.score
 
-        # if self.score <= -500.:
+        # if self.score <= -700.:
         #     done = True
 
-        if self.current_step > 1000:
+        if self.current_step > 2000:
             done = True
-
 
         return obs, self.reward, done, []
 
@@ -111,6 +109,7 @@ class VivaniaEnv(Env):
         self.current_step = 0
         self.reward = 0.
         self.info = []
+        pygame.quit()
         nodes_dict = self.make_nodes()
         segments_dict = self.make_segments(nodes_dict)
         dijkstra = Dijkstras(nodes_dict)
@@ -145,19 +144,22 @@ class VivaniaEnv(Env):
         n_n4 = Node('n4', Vector3(201, 457, 0), ['n3', 'n5'])
         n_n5 = Node('n5', Vector3(320, 302, 0), ['dump_zone', 'c1', 'n4', 'n6'])
         n_c1 = Node('c1', Vector3(548, 293, 0), ['n5'])
+        n_c1.material = 'waste'
         n_dump_zone = Node('dump_zone', Vector3(81, 256, 0), ['n5'])
         n_n6 = Node('n6', Vector3(521, 319, 0), ['n5', 'n7'])
         n_n7 = Node('n7', Vector3(569, 417, 0), ['n6', 'n8'])
         n_n8 = Node('n8', Vector3(593, 600, 0), ['n7', 'c2', 'n9'])
         n_c2 = Node('c2', Vector3(612, 751, 0), ['n8'])
+        n_c2.material = 'waste'
         n_n9 = Node('n9', Vector3(446, 804, 0), ['n8', 'c3', 'n10'])
         n_c3 = Node('c3', Vector3(331, 846, 0), ['n9'])
-        n_c3.material = 'mineral'
+        n_c3.material = 'waste'
         n_n10 = Node('n10', Vector3(323, 801, 0), ['n9', 'n11'])
         n_n11 = Node('n11', Vector3(280, 689, 0), ['n12', 'n10'])
         n_n12 = Node('n12', Vector3(286, 537, 0), ['n11', 'n14', 'n13'])
         n_n13 = Node('n13', Vector3(305, 404, 0), ['n12', 'c4'])
         n_c4 = Node('c4', Vector3(426, 377, 0), ['n13'])
+        n_c4.material = 'waste'
         n_n14 = Node('n14', Vector3(354, 440, 0), ['n12', 'n15'])
         n_n15 = Node('n15', Vector3(472, 473, 0), ['n14', 'n16'])
         n_n16 = Node('n16', Vector3(485, 549, 0), ['n15', 'c6', 'c5'])
@@ -257,12 +259,12 @@ class VivaniaEnv(Env):
         return segments_list
 
     def make_shovels(self, group):
-        shovels_dict = {'c6': Shovel(group, 'Shovel c6', 'c6', 40, 0.9),
-                        'c5': Shovel(group, 'Shovel c5', 'c5', 40, 0.9),
-                        'c4': Shovel(group, 'Shovel c4', 'c4', 40, 0.9),
-                        'c3': Shovel(group, 'Shovel c3', 'c3', 40, 0.9),
-                        'c2': Shovel(group, 'Shovel c2', 'c2', 40, 0.9),
-                        'c1': Shovel(group, 'Shovel c1', 'c1', 40, 0.9)}
+        shovels_dict = {'c6': Shovel(group, 'Shovel c6', 'c6', 47, 0.91),
+                        'c5': Shovel(group, 'Shovel c5', 'c5', 47, 0.92),
+                        'c4': Shovel(group, 'Shovel c4', 'c4', 45, 0.89),
+                        'c3': Shovel(group, 'Shovel c3', 'c3', 40, 0.82),
+                        'c2': Shovel(group, 'Shovel c2', 'c2', 37, 0.80),
+                        'c1': Shovel(group, 'Shovel c1', 'c1', 35, 0.7)}
         return shovels_dict
 
     def make_dumps(self, group):
@@ -276,28 +278,28 @@ class VivaniaEnv(Env):
             1: Truck(Vector3(91, 926, 0), render, 1, 0.68, 200),
             2: Truck(Vector3(91, 926, 0), render, 2, 0.75, 200),
             3: Truck(Vector3(91, 926, 0), render, 3, 0.9, 200),
-            4: Truck(Vector3(91, 926, 0), render, 4, 0.89, 200),
+            4: Truck(Vector3(91, 926, 0), render, 4, 0.89, 250),
             5: Truck(Vector3(91, 926, 0), render, 5, 0.79, 200),
             6: Truck(Vector3(91, 926, 0), render, 6, 0.81, 200),
             7: Truck(Vector3(91, 926, 0), render, 7, 0.77, 200),
             8: Truck(Vector3(91, 926, 0), render, 8, 0.85, 200),
             9: Truck(Vector3(91, 926, 0), render, 9, 0.70, 200),
-            10: Truck(Vector3(91, 926, 0), render, 10, 0.84, 200),
-            11: Truck(Vector3(91, 926, 0), render, 11, 0.95, 200),
-            12: Truck(Vector3(91, 926, 0), render, 12, 0.99, 200),
-            13: Truck(Vector3(91, 926, 0), render, 13, 0.76, 200),
+            10: Truck(Vector3(91, 926, 0), render, 10, 0.84, 190),
+            11: Truck(Vector3(91, 926, 0), render, 11, 0.95, 190),
+            12: Truck(Vector3(91, 926, 0), render, 12, 0.99, 250),
+            13: Truck(Vector3(91, 926, 0), render, 13, 0.76, 190),
             14: Truck(Vector3(91, 926, 0), render, 14, 0.83, 200),
             15: Truck(Vector3(91, 926, 0), render, 15, 0.84, 200),
-            16: Truck(Vector3(91, 926, 0), render, 16, 0.95, 200),
-            17: Truck(Vector3(91, 926, 0), render, 17, 0.99, 200),
+            16: Truck(Vector3(91, 926, 0), render, 16, 0.95, 250),
+            17: Truck(Vector3(91, 926, 0), render, 17, 0.99, 250),
             18: Truck(Vector3(91, 926, 0), render, 18, 0.76, 200),
             19: Truck(Vector3(91, 926, 0), render, 19, 0.83, 200),
             20: Truck(Vector3(91, 926, 0), render, 20, 0.89, 200),
-            21: Truck(Vector3(91, 926, 0), render, 21, 0.79, 200),
-            22: Truck(Vector3(91, 926, 0), render, 22, 0.81, 200),
-            23: Truck(Vector3(91, 926, 0), render, 23, 0.77, 200),
-            24: Truck(Vector3(91, 926, 0), render, 24, 0.85, 200),
-            25: Truck(Vector3(91, 926, 0), render, 25, 0.70, 200)
+            21: Truck(Vector3(91, 926, 0), render, 21, 0.79, 190),
+            22: Truck(Vector3(91, 926, 0), render, 22, 0.81, 190),
+            23: Truck(Vector3(91, 926, 0), render, 23, 0.77, 220),
+            24: Truck(Vector3(91, 926, 0), render, 24, 0.85, 220),
+            25: Truck(Vector3(91, 926, 0), render, 25, 0.88, 220)
         }
         return list(trucks_dict.values())
 

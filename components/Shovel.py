@@ -31,8 +31,8 @@ class Shovel(pygame.sprite.Sprite):
     def update(self):
         if not self.is_loading:
             self.render.hang += self.render.animation_speed/1000
-            self.render.score -= 0.5*self.render.animation_speed/1000
-            self.render.reward -= 0.5 * self.render.animation_speed / 1000
+            self.render.score -= 1*self.render.animation_speed/1000
+            self.render.reward -= 1* self.render.animation_speed / 1000
 
     def set_load_time(self, truck_id, payload):
         self.current_loading_time = 0
