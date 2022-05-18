@@ -12,7 +12,6 @@ import pygame
 from gym import Env, spaces
 import time
 
-from gym.core import ObsType, ActType
 from pygame.math import Vector3
 
 from components.Crusher import Crusher
@@ -38,16 +37,16 @@ class VivaniaEnv(Env):
         """
         Obs orden definition
         for n trucks should be:
-        np.tile([is_loading, is_dumping, speed, material_type, tonnage],(n,1))
+        np.tile([is_loading, is_dumping, speed, material_type, tonnage, current_shovel],(n,1))
         """
-        self.observation_space = spaces.Box(low=np.float32(np.tile([0, 0, 0, 0, 0], (self.amount_of_trucks, 1))),
-                                            high=np.float32(np.tile([1, 1, 30, 3, 300], (self.amount_of_trucks, 1))),
+        self.observation_space = spaces.Box(low=np.float32(np.tile([0, 0, 0, 0, 0, 0], (self.amount_of_trucks, 1))),
+                                            high=np.float32(np.tile([1, 1, 30, 3, 350, 8], (self.amount_of_trucks, 1))),
                                             dtype=np.float32)
+        self.action_space = spaces.MultiDiscrete(np.array([8] * self.amount_of_trucks))
         self.hidden = hidden
         # Define an action space ranging from 0 to 8
-        self._max_episode_steps = 500
+        self._max_episode_steps = 1000
         self.current_step = 0
-        self.action_space = spaces.MultiDiscrete([8] * self.amount_of_trucks)
         # Define elements present inside the environment
         self.elements = []
         self.render_core: RenderCore = None
@@ -66,6 +65,7 @@ class VivaniaEnv(Env):
             act = action[i]
             truck = self.trucks_list[i]
 
+
             truck.move_to_node(self.nodes_to[act])
 
             is_loading = int(truck.is_loading)
@@ -79,7 +79,28 @@ class VivaniaEnv(Env):
             else:
                 material_type = 2
             tonnage = truck.current_load
-            obs.append([is_loading, is_dumping, speed, material_type, tonnage])
+            current_node = truck.current_node_key
+
+            if current_node == 'c1':
+                current_node = 0
+            elif current_node == 'c2':
+                current_node = 1
+            elif current_node == 'c3':
+                current_node = 2
+            elif current_node == 'c4':
+                current_node = 3
+            elif current_node == 'c5':
+                current_node = 4
+            elif current_node == 'c6':
+                current_node = 5
+            elif current_node == 'crusher':
+                current_node = 6
+            elif current_node == 'dump_zone':
+                current_node = 7
+            else:
+                current_node = 8
+
+            obs.append([is_loading, is_dumping, speed, material_type, tonnage, current_node])
             # truck.move_to_node('c1')
 
         # for act in action:
@@ -92,18 +113,19 @@ class VivaniaEnv(Env):
         #                 print(truck.pos)
         #                 print(truck.path)
         self.reward = self.render_core.reward
-        self.render_core.reward -= 0.00001
+        # self.render_core.reward -= 0.00001
 
-        self.render_core.score -= 0.00001
+        # self.render_core.score -= 0.00001
         self.score = self.render_core.score
 
-        # if self.score <= -700.:
+        # if self.score <= -1000.:
         #     done = True
 
-        if self.current_step > 2000:
+        if self.current_step > self._max_episode_steps:
             done = True
+        obs = np.array(obs)
 
-        return obs, self.reward, done, []
+        return obs, self.reward, done, {}
 
     def reset(self):
         self.current_step = 0
@@ -122,7 +144,7 @@ class VivaniaEnv(Env):
         self.render_core.dump_spots = ['dump_zone', 'crusher']
         self.trucks_list = self.make_trucks(self.render_core)
 
-        return np.tile([0, 0, 0, 0, 0], (self.amount_of_trucks, 1))
+        return np.tile([0, 0, 0, 0, 0, 8], (self.amount_of_trucks, 1))
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""

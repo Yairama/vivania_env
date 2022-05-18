@@ -3,6 +3,7 @@ import sys
 import pygame
 from engine.utils import Dijkstra
 import os, sys
+from pygame._sdl2 import Window, Renderer
 
 class RenderCore(pygame.sprite.Group):
     def __init__(self, render_name, path_finder, hidden):
@@ -24,7 +25,7 @@ class RenderCore(pygame.sprite.Group):
         self.drawables = {}
         self.shovels_dict = {}
         self.dumps_dict = {}
-        self.animation_speed = 300
+        self.animation_speed = 750
         # self.display_surface = pygame.display.get_surface()
         self.render_name = render_name
         # camera offset

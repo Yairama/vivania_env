@@ -47,8 +47,8 @@ class Crusher(pygame.sprite.Sprite):
                 self.render.reward += 4 * self.current_load
             elif material == 'waste':
                 self.render.waste_tonnes += self.current_load
-                self.render.score -= self.current_load
-                self.render.reward -= self.current_load
+                self.render.score -= 6*self.current_load
+                self.render.reward -= 6*self.current_load
             self.current_load = 0
             self.current_dumping_time = 0
             self.is_dumping = False
