@@ -40,4 +40,4 @@ Vivania was not able to reduce the Hang efficiently, this is due to the short ti
 Vivania learned to use "bugs" in the test environment to reduce the queue time of the trucks, leaving some unloaded trucks stationary in the unloading areas so that in this way it does not add up the queue times.
 And many other results that I cannot write in this publication.
 
-<video src='https://user-images.githubusercontent.com/45445692/230273468-a967f61a-85dd-4b85-85a2-314054e3e38b.mp4' width=720></video>
+https://user-images.githubusercontent.com/45445692/230273468-a967f61a-85dd-4b85-85a2-314054e3e38b.mp4
