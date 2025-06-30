@@ -15,7 +15,7 @@ class Crusher(pygame.sprite.Sprite):
         self.node = node
         self.pos = self.render.drawables[self.node].get_coords()
         self.real_position = self.render.drawables[self.node].get_coords() + Vector3(-20, -20, 0)
-        self.image = pygame.image.load('vivania_env/resources/crusher.png').convert_alpha()
+        self.image = pygame.image.load('./resources/crusher.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect(center=Vector2(self.real_position.x, self.real_position.y))
 

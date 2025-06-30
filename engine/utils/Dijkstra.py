@@ -1,6 +1,5 @@
 from copy import copy
-
-from numpy import Inf
+import numpy as np
 import heapq
 
 
@@ -37,7 +36,7 @@ class Dijkstras:
 
         for key in keys:
             # initialize distance list as all infinities
-            dist[key] = Inf
+            dist[key] = np.inf  # Changed from Inf to inf
             # initialize list of visited nodes
             visited[key] = False
             path[key] = []
@@ -56,7 +55,7 @@ class Dijkstras:
                 if not visited[keys[i]] and (u == -1 or dist[keys[i]] < dist[keys[u]]):
                     u = i
             # all the nodes have been visited or we can't reach this node
-            if dist[keys[u]] == Inf:
+            if dist[keys[u]] == np.inf:  # Changed from Inf to inf
                 break
             # set the node as visited
             visited[keys[u]] = True

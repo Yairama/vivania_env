@@ -19,11 +19,11 @@ class Truck(pygame.sprite.Sprite):
         :rtype: object
         """
         super().__init__(group)
-        self.or_empty_image = pygame.image.load('vivania_env/resources/empty_truck2.png').convert_alpha()
+        self.or_empty_image = pygame.image.load('./resources/empty_truck2.png').convert_alpha()
         self.or_empty_image = pygame.transform.scale(self.or_empty_image, (30, 20))
-        self.or_waste_load_image = pygame.image.load('vivania_env/resources/waste_loaded_truck.png').convert_alpha()
+        self.or_waste_load_image = pygame.image.load('./resources/waste_loaded_truck.png').convert_alpha()
         self.or_waste_load_image = pygame.transform.scale(self.or_waste_load_image, (30, 20))
-        self.or_mineral_load_image = pygame.image.load('vivania_env/resources/mineral_loaded_truck.png').convert_alpha()
+        self.or_mineral_load_image = pygame.image.load('./resources/mineral_loaded_truck.png').convert_alpha()
         self.or_mineral_load_image = pygame.transform.scale(self.or_mineral_load_image, (30, 20))
         self.image = copy(self.or_empty_image)
         self.pos = pos
